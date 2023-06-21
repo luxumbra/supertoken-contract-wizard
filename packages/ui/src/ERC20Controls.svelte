@@ -43,7 +43,7 @@
 </section>
 
 <section class="controls-section">
-  <h1>Features</h1>
+ <!--  <h1>Features</h1>
 
   <div class="checkbox-group">
     <label class:checked={opts.mintable}>
@@ -104,7 +104,7 @@
         For on-chain voting, the Votes option is preferable.
       </HelpTooltip>
     </label>
-  </div>
+  </div> -->
 </section>
 
 <AccessControlSection bind:access={opts.access} required={requireAccessControl} />
