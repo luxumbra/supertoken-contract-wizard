@@ -126,20 +126,24 @@
     <div class="tab overflow-hidden">
       <OverflowMenu>
         <button class:selected={tab === 'ERC20'} on:click={() => tab = 'ERC20'}>
-          ERC20
+          Pure
         </button>
         <button class:selected={tab === 'ERC721'} on:click={() => tab = 'ERC721'}>
-          ERC721
+          Burnable
         </button>
         <button class:selected={tab === 'ERC1155'} on:click={() => tab = 'ERC1155'}>
-          ERC1155
+          Mintable
         </button>
         <button class:selected={tab === 'Governor'} on:click={() => tab = 'Governor'}>
-          Governor
+          BurnMint
         </button>
         <button class:selected={tab === 'Custom'} on:click={() => tab = 'Custom'}>
-          Custom
+          Capped
         </button>
+        <button class:selected={tab === 'Custom'} on:click={() => tab = 'Custom'}>
+          MaticBridged
+        </button>
+        
       </OverflowMenu>
     </div>
 

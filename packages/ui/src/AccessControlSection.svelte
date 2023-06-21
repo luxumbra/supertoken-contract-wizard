@@ -29,8 +29,7 @@
 </script>
 
 <section class="controls-section">
-  <h1>
-    <!-- svelte-ignore a11y-label-has-associated-control -->
+  <!-- <h1>
     <label class="flex items-center tooltip-container pr-2">
       <span>Access Control</span>
       <span class="ml-1">
@@ -57,6 +56,6 @@
         Flexible mechanism with a separate role for each privileged action. A role can have many authorized accounts.
       </HelpTooltip>
     </label>
-  </div>
+  </div> -->
 </section>
 

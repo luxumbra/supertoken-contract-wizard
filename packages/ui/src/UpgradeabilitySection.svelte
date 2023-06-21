@@ -8,8 +8,7 @@
 </script>
 
 <section class="controls-section">
-  <h1>
-    <!-- svelte-ignore a11y-label-has-associated-control -->
+  <!-- <h1>
     <label class="flex items-center tooltip-container pr-2">
       <span>Upgradeability</span>
       <span class="ml-1">
@@ -36,6 +35,6 @@
       Uses simpler proxy with less overhead, requires including extra code in your contract. Allows flexibility for authorizing upgrades.
       </HelpTooltip>
     </label>
-  </div>
+  </div> -->
 </section>
 

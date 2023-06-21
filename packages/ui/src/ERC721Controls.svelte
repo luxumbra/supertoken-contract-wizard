@@ -56,7 +56,7 @@
 </section>
 
 <section class="controls-section">
-  <h1>Features</h1>
+  <!-- <h1>Features</h1>
 
   <div class="checkbox-group">
     <label class:checked={opts.mintable}>
@@ -109,7 +109,7 @@
         Allows updating token URIs for individual token IDs.
       </HelpTooltip>
     </label>
-  </div>
+  </div> -->
 </section>
 
 <AccessControlSection bind:access={opts.access} required={requireAccessControl} />
