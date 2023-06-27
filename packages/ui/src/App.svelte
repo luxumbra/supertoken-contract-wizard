@@ -125,7 +125,7 @@
   <div class="header flex flex-row justify-between">
     <div class="tab overflow-hidden">
       <OverflowMenu>
-        <button class:selected={tab === 'ERC20'} on:click={() => tab = 'ERC20'}>
+        <button class:selected={tab === 'PURE'} on:click={() => tab = 'PURE'}>
           Pure
         </button>
         <button class:selected={tab === 'ERC721'} on:click={() => tab = 'ERC721'}>
@@ -137,7 +137,7 @@
         <button class:selected={tab === 'Governor'} on:click={() => tab = 'Governor'}>
           BurnMint
         </button>
-        <button class:selected={tab === 'Custom'} on:click={() => tab = 'Governor'}>
+        <button class:selected={tab === 'Custom'} on:click={() => tab = 'Custom'}>
           Capped
         </button>
         <button class:selected={tab === 'Custom'} on:click={() => tab = 'Custom'}>
@@ -223,7 +223,7 @@
 
   <div class="flex flex-row gap-4 grow">
     <div class="controls w-64 flex flex-col shrink-0 justify-between">
-      <div class:hidden={tab !== 'ERC20'}>
+      <div class:hidden={tab !== 'PURE'}>
         <PureSupertokenControls bind:opts={allOpts.PURE} />
       </div>
       <!-- <div class:hidden={tab !== 'ERC20'}>
