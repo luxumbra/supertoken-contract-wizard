@@ -1,17 +1,17 @@
 <script lang="ts">
   
   import type { KindedOptions } from '@openzeppelin/wizard';
-  import { infoDefaults } from '@openzeppelin/wizard';
-
+  import { infoDefaults, premintPattern } from '@openzeppelin/wizard';
+  import HelpTooltip from './HelpTooltip.svelte';
   import { pureSupertoken } from '@openzeppelin/wizard/src/api';
-  import { defaults } from '@openzeppelin/wizard/src/puretoken';
+  import { pureSupertokenDefaults } from '@openzeppelin/wizard/src/puretoken';
   import AccessControlSection from './AccessControlSection.svelte';
   import InfoSection from './InfoSection.svelte';
   import UpgradeabilitySection from './UpgradeabilitySection.svelte';
 
   export const opts: Required<KindedOptions['PURE']> = {
     kind: 'PURE',
-    ...defaults,
+    ...pureSupertokenDefaults,
     info: { ...infoDefaults }, // create new object since Info is nested
   };
 
@@ -33,17 +33,17 @@
       </label>
     </div>
 
-    <!-- <label class="labeled-input">
+    <label class="labeled-input">
       <span class="flex justify-between pr-2">
         Premint
         <HelpTooltip>Create an initial amount of tokens for the deployer.</HelpTooltip>
       </span>
-      <input bind:value={opts.premint} placeholder="0" pattern={premintPattern.source}>
-    </label> -->
+      <input bind:value={opts.initialSupply} placeholder="0" pattern={premintPattern.source}>
+    </label>
 </section>
 
 <section class="controls-section">
- <!--  <h1>Features</h1>
+  <h1>Features</h1>
 
   <div class="checkbox-group">
     <label class:checked={opts.mintable}>
@@ -54,7 +54,7 @@
       </HelpTooltip>
     </label>
 
-    <label class:checked={opts.burnable}>
+<!--     <label class:checked={opts.burnable}>
       <input type="checkbox" bind:checked={opts.burnable}>
       Burnable
       <HelpTooltip link="https://docs.openzeppelin.com/contracts/4.x/api/token/erc20#ERC20Burnable">
@@ -103,8 +103,8 @@
         <br>
         For on-chain voting, the Votes option is preferable.
       </HelpTooltip>
-    </label>
-  </div> -->
+    </label> -->
+  </div>
 </section>
 
 <AccessControlSection bind:access={opts.access} required={requireAccessControl} />
