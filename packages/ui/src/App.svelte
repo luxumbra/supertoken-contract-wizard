@@ -3,32 +3,32 @@
 
     import hljs from './highlightjs';
 
-    import ERC20Controls from './ERC20Controls.svelte';
-    import ERC721Controls from './ERC721Controls.svelte';
-    import ERC1155Controls from './ERC1155Controls.svelte';
-    import GovernorControls from './GovernorControls.svelte';
     import CustomControls from './CustomControls.svelte';
-    import CopyIcon from './icons/CopyIcon.svelte';
-    import CheckIcon from './icons/CheckIcon.svelte';
-    import RemixIcon from './icons/RemixIcon.svelte';
-    import DownloadIcon from './icons/DownloadIcon.svelte';
-    import ZipIcon from './icons/ZipIcon.svelte';
-    import FileIcon from './icons/FileIcon.svelte';
     import Dropdown from './Dropdown.svelte';
+    import ERC1155Controls from './ERC1155Controls.svelte';
+    import ERC721Controls from './ERC721Controls.svelte';
+    import GovernorControls from './GovernorControls.svelte';
     import OverflowMenu from './OverflowMenu.svelte';
     import Tooltip from './Tooltip.svelte';
+    import CheckIcon from './icons/CheckIcon.svelte';
+    import CopyIcon from './icons/CopyIcon.svelte';
+    import DownloadIcon from './icons/DownloadIcon.svelte';
+    import FileIcon from './icons/FileIcon.svelte';
+    import RemixIcon from './icons/RemixIcon.svelte';
+    import ZipIcon from './icons/ZipIcon.svelte';
 
-    import type { KindedOptions, Kind, Contract, OptionsErrorMessages } from '@openzeppelin/wizard';
-    import { ContractBuilder, buildGeneric, printContract, sanitizeKind, OptionsError } from '@openzeppelin/wizard';
+    import type { Contract, Kind, KindedOptions, OptionsErrorMessages } from '@openzeppelin/wizard';
+    import { ContractBuilder, OptionsError, buildGeneric, printContract, sanitizeKind } from '@openzeppelin/wizard';
     import { postConfig } from './post-config';
     import { remixURL } from './remix';
 
     import { saveAs } from 'file-saver';
+    import PureSupertokenControls from './PureSupertokenControls.svelte';
     import { injectHyperlinks } from './utils/inject-hyperlinks';
 
     const dispatch = createEventDispatcher();
 
-    export let initialTab: string | undefined = 'ERC20';
+    export let initialTab: string | undefined = 'PURE';
 
     export let tab: Kind = sanitizeKind(initialTab);
     $: {
@@ -125,7 +125,7 @@
   <div class="header flex flex-row justify-between">
     <div class="tab overflow-hidden">
       <OverflowMenu>
-        <button class:selected={tab === 'ERC20'} on:click={() => tab = 'ERC20'}>
+        <button class:selected={tab === 'PURE'} on:click={() => tab = 'PURE'}>
           Pure
         </button>
         <button class:selected={tab === 'ERC721'} on:click={() => tab = 'ERC721'}>
@@ -143,7 +143,6 @@
         <button class:selected={tab === 'Custom'} on:click={() => tab = 'Custom'}>
           MaticBridged
         </button>
-        
       </OverflowMenu>
     </div>
 
@@ -224,9 +223,12 @@
 
   <div class="flex flex-row gap-4 grow">
     <div class="controls w-64 flex flex-col shrink-0 justify-between">
-      <div class:hidden={tab !== 'ERC20'}>
-        <ERC20Controls bind:opts={allOpts.ERC20} />
+      <div class:hidden={tab !== 'PURE'}>
+        <PureSupertokenControls bind:opts={allOpts.PURE} />
       </div>
+      <!-- <div class:hidden={tab !== 'ERC20'}>
+        <ERC20Controls bind:opts={allOpts.ERC20} />
+      </div> -->
       <div class:hidden={tab !== 'ERC721'}>
         <ERC721Controls bind:opts={allOpts.ERC721} />
       </div>

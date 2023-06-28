@@ -1,7 +1,7 @@
+import { CommonOptions, defaults as commonDefaults, withCommonDefaults } from './common-options';
 import { Contract, ContractBuilder } from './contract';
-import { CommonOptions, withCommonDefaults, defaults as commonDefaults } from './common-options';
-import { setInfo } from './set-info';
 import { printContract } from './print';
+import { setInfo } from './set-info';
 
 export interface PureSuperTokenOptions extends CommonOptions {
   name: string;
