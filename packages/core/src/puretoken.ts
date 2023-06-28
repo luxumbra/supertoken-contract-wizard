@@ -58,13 +58,14 @@ function addBase(c: ContractBuilder, name: string, symbol: string) {
 }
 
 function addPremint(c: ContractBuilder, receiver: string, initialSupply: number) {
-  //@ts-ignore
-  c.addFunctionCode(`_mint(${receiver}, ${initialSupply}`, functions._mint);
+  c.addFunctionCode(`_mint(${receiver}, ${initialSupply})`, functions._mint);
 }
 
+//wtf
 export const functions = {
   _mint: {
     kind: 'internal' as const,
+    name: '_mint',
     args: [
       { name: 'receiver', type: 'address' },
       { name: 'amount', type: 'uint256' },
