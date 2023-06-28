@@ -29,7 +29,7 @@ import {
   isAccessControlRequired as governorIsAccessControlRequired,
   printGovernor,
 } from './governor';
-import { defaults, printPureSuperToken, type PureSuperTokenOptions } from './puretoken';
+import { pureSupertokenDefaults, printPureSuperToken, type PureSuperTokenOptions } from './puretoken';
 
 export interface WizardContractAPI<Options extends CommonOptions> {
 	/**
@@ -57,7 +57,7 @@ export type Custom = WizardContractAPI<CustomOptions>;
 
 export const pureSupertoken: PureSuperToken = {
 	print: printPureSuperToken,
-	defaults: defaults,
+	defaults: pureSupertokenDefaults,
 	isAccessControlRequired: erc20IsAccessControlRequired,
 };
 export const erc20: ERC20 = {
