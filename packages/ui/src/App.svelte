@@ -3,11 +3,7 @@
 
     import hljs from './highlightjs';
 
-    import CustomControls from './CustomControls.svelte';
     import Dropdown from './Dropdown.svelte';
-    import ERC1155Controls from './ERC1155Controls.svelte';
-    import ERC721Controls from './ERC721Controls.svelte';
-    import GovernorControls from './GovernorControls.svelte';
     import OverflowMenu from './OverflowMenu.svelte';
     import Tooltip from './Tooltip.svelte';
     import CheckIcon from './icons/CheckIcon.svelte';
@@ -128,7 +124,7 @@
         <button class:selected={tab === 'PURE'} on:click={() => tab = 'PURE'}>
           Pure
         </button>
-        <button class:selected={tab === 'ERC721'} on:click={() => tab = 'ERC721'}>
+        <!-- <button class:selected={tab === 'ERC721'} on:click={() => tab = 'ERC721'}>
           Burnable
         </button>
         <button class:selected={tab === 'ERC1155'} on:click={() => tab = 'ERC1155'}>
@@ -142,7 +138,7 @@
         </button>
         <button class:selected={tab === 'Custom'} on:click={() => tab = 'Custom'}>
           MaticBridged
-        </button>
+        </button> -->
       </OverflowMenu>
     </div>
 
@@ -228,7 +224,7 @@
       </div>
       <!-- <div class:hidden={tab !== 'ERC20'}>
         <ERC20Controls bind:opts={allOpts.ERC20} />
-      </div> -->
+      </div>
       <div class:hidden={tab !== 'ERC721'}>
         <ERC721Controls bind:opts={allOpts.ERC721} />
       </div>
@@ -240,7 +236,7 @@
       </div>
       <div class:hidden={tab !== 'Custom'}>
         <CustomControls bind:opts={allOpts.Custom} />
-      </div>
+      </div> -->
     </div>
 
     <div class="output flex flex-col grow overflow-auto">
