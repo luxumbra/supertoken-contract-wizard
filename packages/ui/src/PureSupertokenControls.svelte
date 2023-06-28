@@ -2,10 +2,10 @@
   
   import type { KindedOptions } from '@openzeppelin/wizard';
   import { infoDefaults, premintPattern } from '@openzeppelin/wizard';
-  import HelpTooltip from './HelpTooltip.svelte';
   import { pureSupertoken } from '@openzeppelin/wizard/src/api';
   import { pureSupertokenDefaults } from '@openzeppelin/wizard/src/puretoken';
   import AccessControlSection from './AccessControlSection.svelte';
+  import HelpTooltip from './HelpTooltip.svelte';
   import InfoSection from './InfoSection.svelte';
   import UpgradeabilitySection from './UpgradeabilitySection.svelte';
 
@@ -54,7 +54,7 @@
       </HelpTooltip>
     </label>
 
-<!--     <label class:checked={opts.burnable}>
+    <label class:checked={opts.burnable}>
       <input type="checkbox" bind:checked={opts.burnable}>
       Burnable
       <HelpTooltip link="https://docs.openzeppelin.com/contracts/4.x/api/token/erc20#ERC20Burnable">
@@ -62,7 +62,7 @@
       </HelpTooltip>
     </label>
 
-    <label class:checked={opts.pausable}>
+    <!-- <label class:checked={opts.pausable}>
       <input type="checkbox" bind:checked={opts.pausable}>
       Pausable
       <HelpTooltip link="https://docs.openzeppelin.com/contracts/4.x/api/security#Pausable">
