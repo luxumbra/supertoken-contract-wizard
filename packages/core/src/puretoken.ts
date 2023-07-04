@@ -54,7 +54,7 @@ export function buildPureSuperToken(opts: PureSuperTokenOptions): Contract {
   setInfo(c, info);
 
   if (allOpts.burnable) {
-    
+    addBurnable(c)
   }
 
   if (allOpts.mintable) {
@@ -85,11 +85,8 @@ function addPremint(c: ContractBuilder, receiver: string, initialSupply: number)
   c.addFunctionCode(`_mint(${receiver}, ${initialSupply})`, functions._mint);
 }
 
-function addBurnable(c: ContractBuilder) {
-  c.addParent({
-    name: 'ERC20Burnable',
-    path: '@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol',
-  });
+function addBurnable(c: ContractBuilder, amount?: number, ) {
+  c.addFunctionCode(`burn(${amount})`, functions.burn);
 }
 
 function addMintable(c: ContractBuilder, receiver: string, amount: number) {
@@ -130,4 +127,12 @@ export const functions = {
       { name: 'userData', type: 'bytes' },
     ]
   },
+  burn: {
+    kind: 'external' as const,
+    name: 'burn',
+    args: [
+      { name: 'amount', type: 'uint256' },
+      { name: 'userData', type: 'bytes' },
+    ]
+  }
 };
