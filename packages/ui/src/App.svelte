@@ -12,7 +12,7 @@
     import FileIcon from './icons/FileIcon.svelte';
     import RemixIcon from './icons/RemixIcon.svelte';
     import ZipIcon from './icons/ZipIcon.svelte';
-
+    import CappedSupertokenControls from './CappedSupertokenControls.svelte';
     import type { Contract, Kind, KindedOptions, OptionsErrorMessages } from '@openzeppelin/wizard';
     import { ContractBuilder, OptionsError, buildGeneric, printContract, sanitizeKind } from '@openzeppelin/wizard';
     import { postConfig } from './post-config';
@@ -124,6 +124,9 @@
         <button class:selected={tab === 'PURE'} on:click={() => tab = 'PURE'}>
           Pure
         </button>
+        <button class:selected={tab === 'Capped'} on:click={() => tab = 'Capped'}>
+          Capped
+        </button>
         <!-- <button class:selected={tab === 'ERC721'} on:click={() => tab = 'ERC721'}>
           Burnable
         </button>
@@ -133,9 +136,7 @@
         <button class:selected={tab === 'Governor'} on:click={() => tab = 'Governor'}>
           BurnMint
         </button>
-        <button class:selected={tab === 'Custom'} on:click={() => tab = 'Custom'}>
-          Capped
-        </button>
+      
         <button class:selected={tab === 'Custom'} on:click={() => tab = 'Custom'}>
           MaticBridged
         </button> -->
@@ -221,6 +222,9 @@
     <div class="controls w-64 flex flex-col shrink-0 justify-between">
       <div class:hidden={tab !== 'PURE'}>
         <PureSupertokenControls bind:opts={allOpts.PURE} />
+      </div>
+      <div class:hidden={tab !== 'Capped'}>
+        <CappedSupertokenControls bind:opts={allOpts.Capped} />
       </div>
       <!-- <div class:hidden={tab !== 'ERC20'}>
         <ERC20Controls bind:opts={allOpts.ERC20} />

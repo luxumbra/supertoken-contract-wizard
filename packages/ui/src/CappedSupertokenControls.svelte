@@ -2,20 +2,22 @@
   
   import type { KindedOptions } from '@openzeppelin/wizard';
   import { infoDefaults, premintPattern } from '@openzeppelin/wizard';
-  import { pureSupertoken } from '@openzeppelin/wizard/src/api';
+  import { cappedSupertoken, pureSupertoken } from '@openzeppelin/wizard/src/api';
   import { pureSupertokenDefaults } from '@openzeppelin/wizard/src/puretoken';
+  import { cappedSupertokenDefaults } from '@openzeppelin/wizard/src/capped-supertoken';
+  
   import AccessControlSection from './AccessControlSection.svelte';
   import HelpTooltip from './HelpTooltip.svelte';
   import InfoSection from './InfoSection.svelte';
   import UpgradeabilitySection from './UpgradeabilitySection.svelte';
 
-  export const opts: Required<KindedOptions['PURE']> = {
-    kind: 'PURE',
-    ...pureSupertokenDefaults,
+  export const opts: Required<KindedOptions['Capped']> = {
+    kind: 'Capped',
+    ...cappedSupertokenDefaults,
     info: { ...infoDefaults }, // create new object since Info is nested
   };
 
-  $: requireAccessControl = pureSupertoken.isAccessControlRequired(opts);
+  $: requireAccessControl = cappedSupertoken.isAccessControlRequired(opts);
 </script>
 
 <section class="controls-section">
