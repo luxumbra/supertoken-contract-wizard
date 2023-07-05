@@ -1,23 +1,21 @@
 <script lang="ts">
-  
   import type { KindedOptions } from '@openzeppelin/wizard';
   import { infoDefaults, premintPattern } from '@openzeppelin/wizard';
-  import { pureSupertoken } from '@openzeppelin/wizard/src/api';
-  import { pureSupertokenDefaults } from '@openzeppelin/wizard/src/puretoken';
+  import { cappedSupertoken } from '@openzeppelin/wizard/src/api';
+  import { cappedSupertokenDefaults } from '@openzeppelin/wizard/src/cappedtoken';
+
   import AccessControlSection from './AccessControlSection.svelte';
   import HelpTooltip from './HelpTooltip.svelte';
   import InfoSection from './InfoSection.svelte';
   import UpgradeabilitySection from './UpgradeabilitySection.svelte';
 
-  export const opts: Required<KindedOptions['PURE']> = {
-    kind: 'PURE',
-    ...pureSupertokenDefaults,
+  export const opts: Required<KindedOptions['Capped']> = {
+    kind: 'Capped',
+    ...cappedSupertokenDefaults,
     info: { ...infoDefaults }, // create new object since Info is nested
   };
 
-  console.log(opts,'opts');
-
-  $: requireAccessControl = pureSupertoken.isAccessControlRequired(opts);
+  $: requireAccessControl = cappedSupertoken.isAccessControlRequired(opts);
 </script>
 
 <section class="controls-section">
@@ -33,7 +31,6 @@
         <span>Symbol</span>
         <input bind:value={opts.symbol}>
       </label>
-
     </div>
 
     <label class="labeled-input">
@@ -42,14 +39,6 @@
         <HelpTooltip>Create an initial amount of tokens for the deployer.</HelpTooltip>
       </span>
       <input bind:value={opts.initialSupply} placeholder="0" pattern={premintPattern.source}>
-    </label>
-          
-    <label class="labeled-input">
-      <span class="flex justify-between pr-2">
-        Receiver
-        <HelpTooltip>Create an initial receiver.</HelpTooltip>
-      </span>
-      <input bind:value={opts.receiver}>
     </label>
 </section>
 
@@ -64,12 +53,13 @@
         Privileged accounts will be able to create more supply.
       </HelpTooltip>
     </label>
-
-    <label class:checked={opts.burnable}>
-      <input type="checkbox" bind:checked={opts.burnable}>
-      Burnable
+  </div>
+  <div class={`checkbox-group ${!opts.mintable && 'is-disabled'}`}>
+    <label class:checked={opts.ownable}>
+      <input type="checkbox" bind:checked={opts.ownable} disabled={!opts.mintable ?? true} >
+      Ownable (Modifier)
       <HelpTooltip>
-        Token holders will be able to destroy their tokens.
+        {!opts.mintable ? 'This is a modifier for the Mintable method. Please select Mintable first' : 'Only the owner will be able to mint the tokens'}.
       </HelpTooltip>
     </label>
   </div>

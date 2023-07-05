@@ -1,6 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
-
+    import { connected } from 'svelte-wagmi';
     import hljs from './highlightjs';
 
     import Dropdown from './Dropdown.svelte';
@@ -12,16 +12,27 @@
     import FileIcon from './icons/FileIcon.svelte';
     import RemixIcon from './icons/RemixIcon.svelte';
     import ZipIcon from './icons/ZipIcon.svelte';
-
+    import CappedSupertokenControls from './CappedSupertokenControls.svelte';
     import type { Contract, Kind, KindedOptions, OptionsErrorMessages } from '@openzeppelin/wizard';
     import { ContractBuilder, OptionsError, buildGeneric, printContract, sanitizeKind } from '@openzeppelin/wizard';
     import { postConfig } from './post-config';
     import { remixURL } from './remix';
-
+    import { wagmiLoaded } from 'svelte-wagmi';
     import { saveAs } from 'file-saver';
+    import { chainId } from 'svelte-wagmi';
     import PureSupertokenControls from './PureSupertokenControls.svelte';
     import { injectHyperlinks } from './utils/inject-hyperlinks';
+    import { signerAddress } from 'svelte-wagmi';
+    import { web3Modal } from 'svelte-wagmi';
+    import { configureWagmi } from 'svelte-wagmi';
 
+    configureWagmi({
+      walletconnect: true,
+      walletconnectProjectID: '68fcbeed1aee822daef920257ba3f2de',
+      alchemyKey: 'abcdefghijklmnopqrstuvwxyz123456',
+      autoConnect: true
+    });
+ 
     const dispatch = createEventDispatcher();
 
     export let initialTab: string | undefined = 'PURE';
@@ -118,11 +129,42 @@
 </script>
 
 <div class="container flex flex-col gap-4 p-4">
+  {#if $connected}
+  <p>Connected to Ethereum</p>
+  {:else}
+  <p>Not connected to Ethereum</p>
+  {/if}
+  {#if $wagmiLoaded}
+  <p>@wagmi/core is loaded and initialized</p>
+  {:else}
+  <p>@wagmi/core is not yet loaded</p>
+  {/if}
+  {#if $chainId}
+  <p>Current chain ID: {$chainId}</p>
+  {:else}
+  <p>Chain ID not yet available</p>
+  {/if}
+  {#if $signerAddress}
+  <p>Current signer address: {$signerAddress}</p>
+  {:else}
+  <p>Signer address not yet available</p>
+  {/if}
+  {#if $web3Modal}
+  <button on:click={$web3Modal.openModal}>
+  Connect to Ethereum
+  </button>
+  {:else}
+
+    <p>Web3Modal not yet available</p>
+  {/if}
   <div class="header flex flex-row justify-between">
     <div class="tab overflow-hidden">
       <OverflowMenu>
         <button class:selected={tab === 'PURE'} on:click={() => tab = 'PURE'}>
           Pure
+        </button>
+        <button class:selected={tab === 'Capped'} on:click={() => tab = 'Capped'}>
+          Capped
         </button>
         <!-- <button class:selected={tab === 'ERC721'} on:click={() => tab = 'ERC721'}>
           Burnable
@@ -133,9 +175,7 @@
         <button class:selected={tab === 'Governor'} on:click={() => tab = 'Governor'}>
           BurnMint
         </button>
-        <button class:selected={tab === 'Custom'} on:click={() => tab = 'Custom'}>
-          Capped
-        </button>
+      
         <button class:selected={tab === 'Custom'} on:click={() => tab = 'Custom'}>
           MaticBridged
         </button> -->
@@ -221,6 +261,9 @@
     <div class="controls w-64 flex flex-col shrink-0 justify-between">
       <div class:hidden={tab !== 'PURE'}>
         <PureSupertokenControls bind:opts={allOpts.PURE} />
+      </div>
+      <div class:hidden={tab !== 'Capped'}>
+        <CappedSupertokenControls bind:opts={allOpts.Capped} />
       </div>
       <!-- <div class:hidden={tab !== 'ERC20'}>
         <ERC20Controls bind:opts={allOpts.ERC20} />
