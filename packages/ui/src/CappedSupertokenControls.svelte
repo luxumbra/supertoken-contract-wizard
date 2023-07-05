@@ -19,7 +19,7 @@
 </script>
 
 <section class="controls-section">
-  <h1>Settings</h1>
+  <h2>Settings</h2>
 
     <div class="grid grid-cols-[2fr,1fr] gap-2">
       <label class="labeled-input">
@@ -43,7 +43,7 @@
 </section>
 
 <section class="controls-section">
-  <h1>Features</h1>
+  <h2>Features</h2>
 
   <div class="checkbox-group">
     <label class:checked={opts.mintable}>
@@ -51,15 +51,6 @@
       Mintable
       <HelpTooltip>
         Privileged accounts will be able to create more supply.
-      </HelpTooltip>
-    </label>
-  </div>
-  <div class={`checkbox-group ${!opts.mintable && 'is-disabled'}`}>
-    <label class:checked={opts.ownable}>
-      <input type="checkbox" bind:checked={opts.ownable} disabled={!opts.mintable ?? true} >
-      Ownable (Modifier)
-      <HelpTooltip>
-        {!opts.mintable ? 'This is a modifier for the Mintable method. Please select Mintable first' : 'Only the owner will be able to mint the tokens'}.
       </HelpTooltip>
     </label>
   </div>

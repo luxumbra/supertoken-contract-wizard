@@ -1,7 +1,8 @@
 import { CommonOptions, defaults as commonDefaults, withCommonDefaults } from './common-options';
-import { Contract, ContractBuilder } from './contract';
+import { BaseFunction, Contract, ContractBuilder } from './contract';
 import { printContract } from './print';
 import { setInfo } from './set-info';
+import { premintPattern } from '@openzeppelin/wizard';
 
 export interface CappedSuperTokenOptions extends CommonOptions {
   name: string;
@@ -36,7 +37,6 @@ function withDefaults(opts: CappedSuperTokenOptions): Required<CappedSuperTokenO
     ...withCommonDefaults(opts),
     initialSupply: opts.initialSupply ?? cappedSupertokenDefaults.initialSupply,
     receiver: opts.receiver || cappedSupertokenDefaults.receiver,
-    ownable: opts.ownable ?? cappedSupertokenDefaults.ownable,
   };
 }
 
@@ -47,65 +47,90 @@ export function printCappedSuperToken(opts: CappedSuperTokenOptions = cappedSupe
 export function buildCappedSuperToken(opts: CappedSuperTokenOptions): Contract {
   const allOpts = withDefaults(opts);
 
+  console.log({allOpts});
+
   const c = new ContractBuilder(allOpts.name);
 
   const { access, info } = allOpts;
 
   addBase(c, allOpts.name, allOpts.symbol);
-  addPremint(c, allOpts.receiver, allOpts.initialSupply);
+
+  if (allOpts.initialSupply > 0) {
+    addPremint(c, allOpts.receiver, allOpts.initialSupply);
+  }
 
   setInfo(c, info);
 
   if (allOpts.mintable) {
     addMintable(c, allOpts.receiver, allOpts.initialSupply);
-
-    if (allOpts.ownable) {
-      addOwnable(c);
-    }
   }
+
+  if (access === 'ownable') {
+    addOwnable(c);
+  }
+
 
   return c;
 }
 
 function addBase(c: ContractBuilder, name: string, symbol: string) {
   c.addParent({
-    name: 'CappedSuperTokenBase',
-    path: '../custom-supertokens/contracts/CappedSupertoken.sol',
+    name: 'CappedSuperToken',
+    path: '../custom-supertokens/contracts/CappedSuperToken.sol',
   });
 
   c.addConstructorCode(`_initialize(factory, "${name}", "${symbol}");`);
 }
 
-function addPremint(c: ContractBuilder, receiver: string, initialSupply: number) {
-  c.addFunctionCode(`_mint(${receiver}, ${initialSupply})`, functions._mint);
-}
 
-function addBurnable(c: ContractBuilder, amount?: number, ) {
-  c.addFunctionCode(`burn(${amount})`, functions.burn);
+
+function addPremint(c: ContractBuilder, receiver: string, initialSupply: number) {
+  const amount = initialSupply.toString();
+  const m = amount.match(premintPattern);
+  if (m) {
+    const integer = m[1]?.replace(/^0+/, '') ?? '';
+    const decimals = m[2]?.replace(/0+$/, '') ?? '';
+    const exponent = Number(m[3] ?? 0);
+
+    if (Number(integer + decimals) > 0) {
+      const decimalPlace = decimals.length - exponent;
+      const zeroes = new Array(Math.max(0, -decimalPlace)).fill('0').join('');
+      const units = integer + decimals + zeroes;
+      const exp = decimalPlace <= 0 ? 'decimals()' : `(decimals() - ${decimalPlace})`;
+      c.addConstructorCode(`_mint(msg.sender, ${units} * 10 ** ${exp});`);
+    }
+  }
+
 }
 
 function addOwnable(c: ContractBuilder) {
+  c.addParent({
+    name: 'Ownable',
+    path: '@openzeppelin/contracts/access/Ownable.sol',
+  });
   c.addModifier(`onlyOwner`, functions.mint);
 }
 
 function addMintable(c: ContractBuilder, receiver: string, amount: number) {
-  c.addFunctionCode(`mint(${receiver}, ${amount})`, functions.mint);
+
+  c.addFunctionCode(`if (_totalSupply() + ${amount} > maxSupply) revert SupplyCapped();`, functions.mint);
+  c.addFunctionCode(`_mint(receiver, amount, data);`, functions.mint);
 }
 
-function addCapped(c: ContractBuilder) {
-  c.addParent({
-    name: 'ERC20Burnable',
-    path: '@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol',
-  });
-}
+// function addCapped(c: ContractBuilder) {
+//   c.addParent({
+//     name: 'ERC20Burnable',
+//     path: '@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol',
+//   });
+// }
 
 
-function addMaticBridge(c: ContractBuilder) {
-  c.addParent({
-    name: 'ERC20Burnable',
-    path: '@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol',
-  });
-}
+// function addMaticBridge(c: ContractBuilder) {
+//   c.addParent({
+//     name: 'ERC20Burnable',
+//     path: '@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol',
+//   });
+// }
 
 //wtf
 export const functions = {
