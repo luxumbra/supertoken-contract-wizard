@@ -2,7 +2,7 @@ import { CommonOptions, defaults as commonDefaults, withCommonDefaults } from '.
 import { BaseFunction, Contract, ContractBuilder } from './contract';
 import { printContract } from './print';
 import { setInfo } from './set-info';
-import { premintPattern } from '@openzeppelin/wizard';
+// import { premintPattern } from '@openzeppelin/wizard';
 
 export interface CappedSuperTokenOptions extends CommonOptions {
   name: string;
@@ -86,10 +86,32 @@ function addBase(c: ContractBuilder, name: string, symbol: string) {
   c.addConstructorCode(`_initialize(factory, "${name}", "${symbol}");`);
 }
 
-function formatAmount(amount: number) {
-  const m = amount.toString().match(premintPattern);
-  let result = ''
+// function formatAmount(amount: number) {
+//   const m = amount.toString().match(premintPattern);
+//   let result = ''
 
+//   if (m) {
+//     const integer = m[1]?.replace(/^0+/, '') ?? '';
+//     const decimals = m[2]?.replace(/0+$/, '') ?? '';
+//     const exponent = Number(m[3] ?? 0);
+
+//     if (Number(integer + decimals) > 0) {
+//       const decimalPlace = decimals.length - exponent;
+//       const zeroes = new Array(Math.max(0, -decimalPlace)).fill('0').join('');
+//       const units = integer + decimals + zeroes;
+//       const exp = decimalPlace <= 0 ? 'decimals()' : `(decimals() - ${decimalPlace})`;
+//       result =  `${units} * 10 ** ${exp}`;
+//     }
+//   }
+//   return result;
+// }
+
+export const premintPattern = /^(\d*)(?:\.(\d+))?(?:e(\d+))?$/;
+
+function addPremint(c: ContractBuilder, receiver: string, initialSupply: number) {
+  // const amount = formatAmount(initialSupply);
+  const amount = initialSupply.toString();
+  const m = amount.match(premintPattern);
   if (m) {
     const integer = m[1]?.replace(/^0+/, '') ?? '';
     const decimals = m[2]?.replace(/0+$/, '') ?? '';
@@ -100,17 +122,9 @@ function formatAmount(amount: number) {
       const zeroes = new Array(Math.max(0, -decimalPlace)).fill('0').join('');
       const units = integer + decimals + zeroes;
       const exp = decimalPlace <= 0 ? 'decimals()' : `(decimals() - ${decimalPlace})`;
-      result =  `(${units} * 10 ** ${exp})`;
+      c.addConstructorCode(`_mint(msg.sender, ${units} * 10 ** ${exp});`);
     }
   }
-  return result;
-}
-
-
-function addPremint(c: ContractBuilder, receiver: string, initialSupply: number) {
-  const amount = formatAmount(initialSupply);
-
-  c.addConstructorCode(`_mint(msg.sender, ${amount});`);
 }
 
 function addOwnable(c: ContractBuilder) {
@@ -134,8 +148,8 @@ function addRoles(c: ContractBuilder) {
 }
 
 function addMintable(c: ContractBuilder, receiver: string, amount: number) {
-  const preminted = formatAmount(amount);
-  c.addFunctionCode(`if (_totalSupply() ${amount > 0 ? '+ ' + preminted : ''} > maxSupply) revert SupplyCapped();\n`, functions.mint);
+  // const preminted = formatAmount(amount);
+  c.addFunctionCode(`if (_totalSupply() + ${amount} > maxSupply) revert SupplyCapped();\n`, functions.mint);
   c.addFunctionCode(`_mint(receiver, amount, userData);`, functions.mint);
 }
 
