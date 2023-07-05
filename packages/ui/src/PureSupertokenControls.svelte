@@ -15,6 +15,8 @@
     info: { ...infoDefaults }, // create new object since Info is nested
   };
 
+  console.log(opts,'opts');
+
   $: requireAccessControl = pureSupertoken.isAccessControlRequired(opts);
 </script>
 
