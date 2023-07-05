@@ -18,7 +18,7 @@ export const pureSupertokenDefaults: Required<PureSuperTokenOptions> = {
   name: 'MyToken',
   symbol: 'MTK',
   initialSupply: 0,
-  receiver: '',
+  receiver: '0x1A6784925814a13334190Fd249ae0333B90b6443',
   access: commonDefaults.access,
   upgradeable: commonDefaults.upgradeable,
   info: commonDefaults.info,
@@ -47,7 +47,7 @@ export function buildPureSuperToken(opts: PureSuperTokenOptions): Contract {
   const c = new ContractBuilder(allOpts.name);
 
   const { access, info } = allOpts;
-
+  console.log(allOpts.receiver, 'test')
   addBase(c, allOpts.name, allOpts.symbol);
   addPremint(c, allOpts.receiver, allOpts.initialSupply);
 
@@ -59,14 +59,6 @@ export function buildPureSuperToken(opts: PureSuperTokenOptions): Contract {
 
   if (allOpts.mintable) {
     addMintable(c, allOpts.receiver, allOpts.initialSupply);
-  }
-
-  if (allOpts.capped) {
-
-  }
-
-  if (allOpts.maticBridge) {
-
   }
 
   return c;
@@ -91,20 +83,6 @@ function addBurnable(c: ContractBuilder, amount?: number, ) {
 
 function addMintable(c: ContractBuilder, receiver: string, amount: number) {
   c.addFunctionCode(`mint(${receiver}, ${amount})`, functions.mint);
-}
-
-function addCapped(c: ContractBuilder) {
-  c.addParent({
-    name: 'ERC20Burnable',
-    path: '@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol',
-  });
-}
-
-function addMaticBridge(c: ContractBuilder) {
-  c.addParent({
-    name: 'ERC20Burnable',
-    path: '@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol',
-  });
 }
 
 //wtf

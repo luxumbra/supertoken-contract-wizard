@@ -31,6 +31,7 @@
         <span>Symbol</span>
         <input bind:value={opts.symbol}>
       </label>
+
     </div>
 
     <label class="labeled-input">
@@ -39,6 +40,14 @@
         <HelpTooltip>Create an initial amount of tokens for the deployer.</HelpTooltip>
       </span>
       <input bind:value={opts.initialSupply} placeholder="0" pattern={premintPattern.source}>
+    </label>
+          
+    <label class="labeled-input">
+      <span class="flex justify-between pr-2">
+        Receiver
+        <HelpTooltip>Create an initial receiver.</HelpTooltip>
+      </span>
+      <input bind:value={opts.receiver}>
     </label>
 </section>
 

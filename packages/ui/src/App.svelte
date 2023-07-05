@@ -1,6 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
-
+    import { connected } from 'svelte-wagmi';
     import hljs from './highlightjs';
 
     import Dropdown from './Dropdown.svelte';
@@ -17,11 +17,22 @@
     import { ContractBuilder, OptionsError, buildGeneric, printContract, sanitizeKind } from '@openzeppelin/wizard';
     import { postConfig } from './post-config';
     import { remixURL } from './remix';
-
+    import { wagmiLoaded } from 'svelte-wagmi';
     import { saveAs } from 'file-saver';
+    import { chainId } from 'svelte-wagmi';
     import PureSupertokenControls from './PureSupertokenControls.svelte';
     import { injectHyperlinks } from './utils/inject-hyperlinks';
+    import { signerAddress } from 'svelte-wagmi';
+    import { web3Modal } from 'svelte-wagmi';
+    import { configureWagmi } from 'svelte-wagmi';
 
+    configureWagmi({
+      walletconnect: true,
+      walletconnectProjectID: '68fcbeed1aee822daef920257ba3f2de',
+      alchemyKey: 'abcdefghijklmnopqrstuvwxyz123456',
+      autoConnect: true
+    });
+ 
     const dispatch = createEventDispatcher();
 
     export let initialTab: string | undefined = 'PURE';
@@ -118,6 +129,34 @@
 </script>
 
 <div class="container flex flex-col gap-4 p-4">
+  {#if $connected}
+  <p>Connected to Ethereum</p>
+  {:else}
+  <p>Not connected to Ethereum</p>
+  {/if}
+  {#if $wagmiLoaded}
+  <p>@wagmi/core is loaded and initialized</p>
+  {:else}
+  <p>@wagmi/core is not yet loaded</p>
+  {/if}
+  {#if $chainId}
+  <p>Current chain ID: {$chainId}</p>
+  {:else}
+  <p>Chain ID not yet available</p>
+  {/if}
+  {#if $signerAddress}
+  <p>Current signer address: {$signerAddress}</p>
+  {:else}
+  <p>Signer address not yet available</p>
+  {/if}
+  {#if $web3Modal}
+  <button on:click={$web3Modal.openModal}>
+  Connect to Ethereum
+  </button>
+  {:else}
+
+    <p>Web3Modal not yet available</p>
+  {/if}
   <div class="header flex flex-row justify-between">
     <div class="tab overflow-hidden">
       <OverflowMenu>
