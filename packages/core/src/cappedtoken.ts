@@ -47,8 +47,6 @@ export function printCappedSuperToken(opts: CappedSuperTokenOptions = cappedSupe
 export function buildCappedSuperToken(opts: CappedSuperTokenOptions): Contract {
   const allOpts = withDefaults(opts);
 
-  console.log({allOpts});
-
   const c = new ContractBuilder(allOpts.name);
 
   const { access, info } = allOpts;

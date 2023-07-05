@@ -38,7 +38,7 @@
         Premint
         <HelpTooltip>Create an initial amount of tokens for the deployer.</HelpTooltip>
       </span>
-      <input bind:value={opts.initialSupply} placeholder="0" pattern={premintPattern.source}>
+      <input bind:value={opts.initialSupply} type="number" placeholder="0" pattern={premintPattern.source}>
     </label>
 </section>
 
