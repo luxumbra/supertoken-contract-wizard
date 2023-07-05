@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { OptionsError, type Access } from '@openzeppelin/wizard';
+  import type { Access } from '@openzeppelin/wizard';
 
   import ToggleRadio from './inputs/ToggleRadio.svelte';
   import HelpTooltip from './HelpTooltip.svelte';
@@ -30,17 +30,15 @@
 
 <section class="controls-section">
   <h2>
-    <div class="checkbox-group">
-    <label class:checked={access === 'ownable'}>
+    <label class="flex items-center tooltip-container pr-2" for="access-control">
       <span>Access Control</span>
       <span class="ml-1">
-        <ToggleRadio bind:value={access} defaultValue="ownable" disabled={required} />
+        <ToggleRadio name="access-control" bind:value={access} defaultValue="ownable" disabled={required} />
       </span>
       <HelpTooltip align="right" link="https://docs.openzeppelin.com/contracts/4.x/api/access">
         Restrict who can access the functions of a contract or when they can do it.
       </HelpTooltip>
     </label>
-    </div>
   </h2>
 
   <div class="checkbox-group">
@@ -51,13 +49,13 @@
         Simple mechanism with a single account authorized for all privileged actions.
       </HelpTooltip>
     </label>
-    <!-- <label class:checked={access === 'roles'}>
+    <label class:checked={access === 'roles'}>
       <input type="radio" bind:group={access} value="roles">
       Roles
       <HelpTooltip link="https://docs.openzeppelin.com/contracts/4.x/api/access#AccessControl">
         Flexible mechanism with a separate role for each privileged action. A role can have many authorized accounts.
       </HelpTooltip>
-    </label> -->
+    </label>
   </div>
 </section>
 

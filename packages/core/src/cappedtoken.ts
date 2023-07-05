@@ -69,6 +69,10 @@ export function buildCappedSuperToken(opts: CappedSuperTokenOptions): Contract {
     addOwnable(c);
   }
 
+  if (access === 'roles') {
+    addRoles(c);
+  }
+
 
   return c;
 }
@@ -82,11 +86,10 @@ function addBase(c: ContractBuilder, name: string, symbol: string) {
   c.addConstructorCode(`_initialize(factory, "${name}", "${symbol}");`);
 }
 
+function formatAmount(amount: number) {
+  const m = amount.toString().match(premintPattern);
+  let result = ''
 
-
-function addPremint(c: ContractBuilder, receiver: string, initialSupply: number) {
-  const amount = initialSupply.toString();
-  const m = amount.match(premintPattern);
   if (m) {
     const integer = m[1]?.replace(/^0+/, '') ?? '';
     const decimals = m[2]?.replace(/0+$/, '') ?? '';
@@ -97,10 +100,17 @@ function addPremint(c: ContractBuilder, receiver: string, initialSupply: number)
       const zeroes = new Array(Math.max(0, -decimalPlace)).fill('0').join('');
       const units = integer + decimals + zeroes;
       const exp = decimalPlace <= 0 ? 'decimals()' : `(decimals() - ${decimalPlace})`;
-      c.addConstructorCode(`_mint(msg.sender, ${units} * 10 ** ${exp});`);
+      result =  `(${units} * 10 ** ${exp})`;
     }
   }
+  return result;
+}
 
+
+function addPremint(c: ContractBuilder, receiver: string, initialSupply: number) {
+  const amount = formatAmount(initialSupply);
+
+  c.addConstructorCode(`_mint(msg.sender, ${amount});`);
 }
 
 function addOwnable(c: ContractBuilder) {
@@ -111,10 +121,22 @@ function addOwnable(c: ContractBuilder) {
   c.addModifier(`onlyOwner`, functions.mint);
 }
 
-function addMintable(c: ContractBuilder, receiver: string, amount: number) {
+function addRoles(c: ContractBuilder) {
+  c.addVariable(`bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");`)
+  c.addParent({
+    name: 'AccessControl',
+    path: '@openzeppelin/contracts/access/AccessControl.sol',
+  });
+  c.addModifier(`onlyRole(MINTER_ROLE)`, functions.mint);
 
-  c.addFunctionCode(`if (_totalSupply() + ${amount} > maxSupply) revert SupplyCapped();`, functions.mint);
-  c.addFunctionCode(`_mint(receiver, amount, data);`, functions.mint);
+  c.addConstructorCode(`_setupRole(DEFAULT_ADMIN_ROLE, msg.sender);`);
+  c.addConstructorCode(`_setupRole(MINTER_ROLE, msg.sender);`);
+}
+
+function addMintable(c: ContractBuilder, receiver: string, amount: number) {
+  const preminted = formatAmount(amount);
+  c.addFunctionCode(`if (_totalSupply() ${amount > 0 ? '+ ' + preminted : ''} > maxSupply) revert SupplyCapped();\n`, functions.mint);
+  c.addFunctionCode(`_mint(receiver, amount, userData);`, functions.mint);
 }
 
 // function addCapped(c: ContractBuilder) {
