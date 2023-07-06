@@ -1,5 +1,5 @@
 <script lang="ts">
-  
+
   import type { KindedOptions } from '@openzeppelin/wizard';
   import { infoDefaults, premintPattern } from '@openzeppelin/wizard';
   import { pureSupertoken } from '@openzeppelin/wizard/src/api';
@@ -21,7 +21,7 @@
 </script>
 
 <section class="controls-section">
-  <h1>Settings</h1>
+  <h2>Settings</h2>
 
     <div class="grid grid-cols-[2fr,1fr] gap-2">
       <label class="labeled-input">
@@ -41,7 +41,7 @@
         Premint
         <HelpTooltip>Create an initial amount of tokens for the deployer.</HelpTooltip>
       </span>
-      <input bind:value={opts.initialSupply} placeholder="0" pattern={premintPattern.source}>
+      <input bind:value={opts.initialSupply} type="number" placeholder="0" pattern={premintPattern.source}>
     </label>
           
     <label class="labeled-input">
@@ -54,7 +54,7 @@
 </section>
 
 <section class="controls-section">
-  <h1>Features</h1>
+  <h2>Features</h2>
 
   <div class="checkbox-group">
     <label class:checked={opts.mintable}>

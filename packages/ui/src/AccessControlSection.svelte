@@ -29,17 +29,17 @@
 </script>
 
 <section class="controls-section">
-  <!-- <h1>
-    <label class="flex items-center tooltip-container pr-2">
+  <h2>
+    <label class="flex items-center tooltip-container pr-2" for="access-control">
       <span>Access Control</span>
       <span class="ml-1">
-        <ToggleRadio bind:value={access} defaultValue="ownable" disabled={required} />
+        <ToggleRadio name="access-control" bind:value={access} defaultValue="ownable" disabled={required} />
       </span>
       <HelpTooltip align="right" link="https://docs.openzeppelin.com/contracts/4.x/api/access">
         Restrict who can access the functions of a contract or when they can do it.
       </HelpTooltip>
     </label>
-  </h1>
+  </h2>
 
   <div class="checkbox-group">
     <label class:checked={access === 'ownable'}>
@@ -56,6 +56,6 @@
         Flexible mechanism with a separate role for each privileged action. A role can have many authorized accounts.
       </HelpTooltip>
     </label>
-  </div> -->
+  </div>
 </section>
 

@@ -8,12 +8,12 @@
 </script>
 
 <section class="controls-section">
-  <h1>
+  <h2>
     <!-- svelte-ignore a11y-label-has-associated-control -->
     <label class="flex items-center tooltip-container pr-2">
       <span>Info</span>
     </label>
-  </h1>
+  </h2>
 
   <label class="labeled-input">
     <span class="flex justify-between pr-2">
