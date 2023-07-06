@@ -111,8 +111,8 @@ function addBurnable(c: ContractBuilder, amount?: number,) {
   c.addFunctionCode(`burn(amount, userData)`, functions.burn);
 }
 
-function addMintable(c: ContractBuilder, receiver: string, amount: number) {
-  c.addFunctionCode(`_mint(receiver, amount, data)`, functions.mint);
+function addMintable(c: ContractBuilder, receiver: string, amount: number, userData: string) {
+  c.addFunctionCode(`_mint(${receiver}, ${amount}, ${userData})`, functions.mint);
 }
 
 function addOwnable(c: ContractBuilder) {

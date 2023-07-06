@@ -40,6 +40,14 @@
       </span>
       <input bind:value={opts.initialSupply} type="number" placeholder="0" pattern={premintPattern.source}>
     </label>
+
+    <label class="labeled-input">
+      <span class="flex justify-between pr-2">
+        Receiver
+        <HelpTooltip>Create an initial receiver.</HelpTooltip>
+      </span>
+      <input bind:value={opts.receiver}>
+    </label>
 </section>
 
 <section class="controls-section">

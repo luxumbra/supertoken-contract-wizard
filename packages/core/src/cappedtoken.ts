@@ -20,7 +20,7 @@ export const cappedSupertokenDefaults: Required<CappedSuperTokenOptions> = {
   name: 'MyToken',
   symbol: 'MTK',
   initialSupply: 0,
-  receiver: '',
+  receiver: '0x1A6784925814a13334190Fd249ae0333B90b6443',
   access: commonDefaults.access,
   upgradeable: commonDefaults.upgradeable,
   info: commonDefaults.info,
@@ -148,7 +148,7 @@ function addRoles(c: ContractBuilder) {
 function addMintable(c: ContractBuilder, receiver: string, amount: number) {
   // const preminted = formatAmount(amount);
   c.addFunctionCode(`if (_totalSupply() + ${amount} > maxSupply) revert SupplyCapped();\n`, functions.mint);
-  c.addFunctionCode(`_mint(receiver, amount, userData);`, functions.mint);
+  c.addFunctionCode(`_mint(${receiver}, ${amount}, userData);`, functions.mint);
 }
 
 // function addCapped(c: ContractBuilder) {
