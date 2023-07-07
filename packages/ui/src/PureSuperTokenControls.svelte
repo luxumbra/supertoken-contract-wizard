@@ -1,21 +1,23 @@
 <script lang="ts">
+
   import type { KindedOptions } from '@openzeppelin/wizard';
   import { infoDefaults, premintPattern } from '@openzeppelin/wizard';
-  import { cappedSupertoken } from '@openzeppelin/wizard/src/api';
-  import { cappedSupertokenDefaults } from '@openzeppelin/wizard/src/cappedtoken';
-
+  import { pureSuperToken } from '@openzeppelin/wizard/src/api';
+  import { pureSuperTokenDefaults } from '@openzeppelin/wizard/src/puretoken';
   import AccessControlSection from './AccessControlSection.svelte';
   import HelpTooltip from './HelpTooltip.svelte';
   import InfoSection from './InfoSection.svelte';
   import UpgradeabilitySection from './UpgradeabilitySection.svelte';
 
-  export const opts: Required<KindedOptions['Capped']> = {
-    kind: 'Capped',
-    ...cappedSupertokenDefaults,
+  export const opts: Required<KindedOptions['PURE']> = {
+    kind: 'PURE',
+    ...pureSuperTokenDefaults,
     info: { ...infoDefaults }, // create new object since Info is nested
   };
 
-  $: requireAccessControl = cappedSupertoken.isAccessControlRequired(opts);
+  console.log(opts,'opts');
+
+  $: requireAccessControl = pureSuperToken.isAccessControlRequired(opts);
 </script>
 
 <section class="controls-section">
@@ -31,6 +33,7 @@
         <span>Symbol</span>
         <input bind:value={opts.symbol}>
       </label>
+
     </div>
 
     <label class="labeled-input">
@@ -59,6 +62,14 @@
       Mintable
       <HelpTooltip>
         Privileged accounts will be able to create more supply.
+      </HelpTooltip>
+    </label>
+
+    <label class:checked={opts.burnable}>
+      <input type="checkbox" bind:checked={opts.burnable}>
+      Burnable
+      <HelpTooltip>
+        Token holders will be able to destroy their tokens.
       </HelpTooltip>
     </label>
   </div>

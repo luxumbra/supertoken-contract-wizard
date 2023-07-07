@@ -20,6 +20,7 @@ function isKind<T>(value: Kind | T): value is Kind {
 		case 'ERC721':
 		case 'Governor':
 		case 'Capped':
+		case 'MaticBridged':
 		case 'Custom':
 			return true;
 

@@ -12,7 +12,8 @@
     import FileIcon from './icons/FileIcon.svelte';
     import RemixIcon from './icons/RemixIcon.svelte';
     import ZipIcon from './icons/ZipIcon.svelte';
-    import CappedSupertokenControls from './CappedSupertokenControls.svelte';
+    import CappedSuperTokenControls from './CappedSuperTokenControls.svelte';
+    import MaticBridgedSuperTokenControls from './MaticBridgedSuperTokenControls.svelte';
     import type { Contract, Kind, KindedOptions, OptionsErrorMessages } from '@openzeppelin/wizard';
     import { ContractBuilder, OptionsError, buildGeneric, printContract, sanitizeKind } from '@openzeppelin/wizard';
     import { postConfig } from './post-config';
@@ -20,11 +21,13 @@
     import { wagmiLoaded } from 'svelte-wagmi';
     import { saveAs } from 'file-saver';
     import { chainId } from 'svelte-wagmi';
-    import PureSupertokenControls from './PureSupertokenControls.svelte';
+    import PureSuperTokenControls from './PureSuperTokenControls.svelte';
     import { injectHyperlinks } from './utils/inject-hyperlinks';
     import { signerAddress } from 'svelte-wagmi';
     import { web3Modal } from 'svelte-wagmi';
     import { configureWagmi } from 'svelte-wagmi';
+    import { copy } from 'svelte-copy';
+
 
     configureWagmi({
       walletconnect: true,
@@ -32,7 +35,7 @@
       alchemyKey: 'abcdefghijklmnopqrstuvwxyz123456',
       autoConnect: true
     });
- 
+
     const dispatch = createEventDispatcher();
 
     export let initialTab: string | undefined = 'PURE';
@@ -128,6 +131,7 @@
     };
 </script>
 
+
 <div class="container flex flex-col gap-4 p-4">
   {#if $connected}
   <p>Connected to Ethereum</p>
@@ -145,7 +149,11 @@
   <p>Chain ID not yet available</p>
   {/if}
   {#if $signerAddress}
-  <p>Current signer address: {$signerAddress}</p>
+  <p>Current signer address: {$signerAddress} <button
+    class="copy-button"
+    use:copy={$signerAddress}
+    on:svelte-copy={(event) => alert(`Copied ${$signerAddress} to clipboard`)}
+    ><CopyIcon /></button></p>
   {:else}
   <p>Signer address not yet available</p>
   {/if}
@@ -166,6 +174,9 @@
         <button class:selected={tab === 'Capped'} on:click={() => tab = 'Capped'}>
           Capped
         </button>
+        <button class:selected={tab === 'MaticBridged'} on:click={() => tab = 'MaticBridged'}>
+          MaticBridged
+        </button>
         <!-- <button class:selected={tab === 'ERC721'} on:click={() => tab = 'ERC721'}>
           Burnable
         </button>
@@ -175,10 +186,7 @@
         <button class:selected={tab === 'Governor'} on:click={() => tab = 'Governor'}>
           BurnMint
         </button>
-      
-        <button class:selected={tab === 'Custom'} on:click={() => tab = 'Custom'}>
-          MaticBridged
-        </button> -->
+        -->
       </OverflowMenu>
     </div>
 
@@ -260,10 +268,13 @@
   <div class="flex flex-row gap-4 grow">
     <div class="controls w-64 flex flex-col shrink-0 justify-between">
       <div class:hidden={tab !== 'PURE'}>
-        <PureSupertokenControls bind:opts={allOpts.PURE} />
+        <PureSuperTokenControls bind:opts={allOpts.PURE} />
       </div>
       <div class:hidden={tab !== 'Capped'}>
-        <CappedSupertokenControls bind:opts={allOpts.Capped} />
+        <CappedSuperTokenControls bind:opts={allOpts.Capped} />
+      </div>
+      <div class:hidden={tab !== 'MaticBridged'}>
+        <MaticBridgedSuperTokenControls bind:opts={allOpts.MaticBridged} />
       </div>
       <!-- <div class:hidden={tab !== 'ERC20'}>
         <ERC20Controls bind:opts={allOpts.ERC20} />
@@ -352,6 +363,11 @@
     :global(.icon) {
       margin-right: var(--size-1);
     }
+  }
+
+  .copy-button {
+    background-color: transparent;
+    border: none ;
   }
 
   .controls {

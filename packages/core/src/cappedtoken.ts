@@ -16,7 +16,7 @@ export interface CappedSuperTokenOptions extends CommonOptions {
   maticBridge: boolean;
 }
 
-export const cappedSupertokenDefaults: Required<CappedSuperTokenOptions> = {
+export const cappedSuperTokenDefaults: Required<CappedSuperTokenOptions> = {
   name: 'MyToken',
   symbol: 'MTK',
   initialSupply: 0,
@@ -35,12 +35,12 @@ function withDefaults(opts: CappedSuperTokenOptions): Required<CappedSuperTokenO
   return {
     ...opts,
     ...withCommonDefaults(opts),
-    initialSupply: opts.initialSupply ?? cappedSupertokenDefaults.initialSupply,
-    receiver: opts.receiver || cappedSupertokenDefaults.receiver,
+    initialSupply: opts.initialSupply ?? cappedSuperTokenDefaults.initialSupply,
+    receiver: opts.receiver || cappedSuperTokenDefaults.receiver,
   };
 }
 
-export function printCappedSuperToken(opts: CappedSuperTokenOptions = cappedSupertokenDefaults): string {
+export function printCappedSuperToken(opts: CappedSuperTokenOptions = cappedSuperTokenDefaults): string {
   return printContract(buildCappedSuperToken(opts));
 }
 
@@ -78,7 +78,7 @@ export function buildCappedSuperToken(opts: CappedSuperTokenOptions): Contract {
 function addBase(c: ContractBuilder, name: string, symbol: string) {
   c.addParent({
     name: 'CappedSuperToken',
-    path: '../custom-supertokens/contracts/CappedSuperToken.sol',
+    path: 'github.com/superfluid-finance/custom-supertokens/contracts/CappedSuperToken.sol',
   });
 
   c.addConstructorCode(`_initialize(factory, "${name}", "${symbol}");`);
@@ -151,20 +151,6 @@ function addMintable(c: ContractBuilder, receiver: string, amount: number) {
   c.addFunctionCode(`_mint(${receiver}, ${amount}, userData);`, functions.mint);
 }
 
-// function addCapped(c: ContractBuilder) {
-//   c.addParent({
-//     name: 'ERC20Burnable',
-//     path: '@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol',
-//   });
-// }
-
-
-// function addMaticBridge(c: ContractBuilder) {
-//   c.addParent({
-//     name: 'ERC20Burnable',
-//     path: '@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol',
-//   });
-// }
 
 //wtf
 export const functions = {

@@ -15,7 +15,7 @@ export interface PureSuperTokenOptions extends CommonOptions {
   maticBridge: boolean;
 }
 
-export const pureSupertokenDefaults: Required<PureSuperTokenOptions> = {
+export const pureSuperTokenDefaults: Required<PureSuperTokenOptions> = {
   name: 'MyToken',
   symbol: 'MTK',
   initialSupply: 0,
@@ -34,12 +34,12 @@ function withDefaults(opts: PureSuperTokenOptions): Required<PureSuperTokenOptio
   return {
     ...opts,
     ...withCommonDefaults(opts),
-    initialSupply: opts.initialSupply ?? pureSupertokenDefaults.initialSupply,
-    receiver: opts.receiver || pureSupertokenDefaults.receiver,
+    initialSupply: opts.initialSupply ?? pureSuperTokenDefaults.initialSupply,
+    receiver: opts.receiver || pureSuperTokenDefaults.receiver,
   };
 }
 
-export function printPureSuperToken(opts: PureSuperTokenOptions = pureSupertokenDefaults): string {
+export function printPureSuperToken(opts: PureSuperTokenOptions = pureSuperTokenDefaults): string {
   return printContract(buildPureSuperToken(opts));
 }
 
@@ -78,7 +78,7 @@ export function buildPureSuperToken(opts: PureSuperTokenOptions): Contract {
 function addBase(c: ContractBuilder, name: string, symbol: string) {
   c.addParent({
     name: 'PureSuperToken',
-    path: '../custom-supertokens/contracts/PureSupertoken.sol',
+    path: 'github.com/superfluid-finance/custom-supertokens/contracts/PureSuperToken.sol',
   });
 
   c.addConstructorCode(`_initialize(factory, "${name}", "${symbol}");`);
