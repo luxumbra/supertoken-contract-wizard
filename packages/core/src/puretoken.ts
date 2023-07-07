@@ -3,12 +3,14 @@ import { Contract, ContractBuilder } from './contract';
 import { printContract } from './print';
 import { setInfo } from './set-info';
 import { premintPattern } from './cappedtoken';
+
 export interface PureSuperTokenOptions extends CommonOptions {
   name: string;
   symbol: string;
   initialSupply: number;
   receiver: string;
   mintable: boolean;
+  userData?: string;
   burnable: boolean;
   capped: boolean;
   ownable: boolean;
@@ -19,7 +21,8 @@ export const pureSuperTokenDefaults: Required<PureSuperTokenOptions> = {
   name: 'MyToken',
   symbol: 'MTK',
   initialSupply: 0,
-  receiver: '0x1A6784925814a13334190Fd249ae0333B90b6443',
+  receiver: 'msg.sender',
+  userData: 'userData',
   access: commonDefaults.access,
   upgradeable: commonDefaults.upgradeable,
   info: commonDefaults.info,
@@ -49,19 +52,19 @@ export function buildPureSuperToken(opts: PureSuperTokenOptions): Contract {
   const c = new ContractBuilder(allOpts.name);
 
   const { access, info } = allOpts;
-  console.log(allOpts.receiver, 'test')
-  addBase(c, allOpts.name, allOpts.symbol);
+
+  addBase(c, allOpts.name, allOpts.symbol, allOpts.receiver, allOpts.initialSupply, allOpts.userData);
 
   if (allOpts.initialSupply > 0) addPremint(c, allOpts.receiver, allOpts.initialSupply);
 
   setInfo(c, info);
 
   if (allOpts.burnable) {
-    addBurnable(c)
+    addBurnable(c, allOpts.initialSupply, allOpts.userData);
   }
 
   if (allOpts.mintable) {
-    addMintable(c, allOpts.receiver, allOpts.initialSupply);
+    addMintable(c, allOpts.receiver, allOpts.initialSupply, allOpts.userData);
   }
 
   if (access === 'ownable') {
@@ -75,13 +78,14 @@ export function buildPureSuperToken(opts: PureSuperTokenOptions): Contract {
   return c;
 }
 
-function addBase(c: ContractBuilder, name: string, symbol: string) {
+function addBase(c: ContractBuilder, name: string, symbol: string, receiver: string, amount: number, userData?: string) {
   c.addParent({
     name: 'PureSuperToken',
     path: 'github.com/superfluid-finance/custom-supertokens/contracts/PureSuperToken.sol',
   });
 
-  c.addConstructorCode(`_initialize(factory, "${name}", "${symbol}");`);
+  c.addFunctionCode(`_initialize(factory, ${name}, ${symbol});`, functions.initialize);
+  c.addFunctionCode(`_mint(${receiver}, ${amount}, ${userData});`, functions.initialize);
 }
 
 function addPremint(c: ContractBuilder, receiver: string, initialSupply: number) {
@@ -102,17 +106,12 @@ function addPremint(c: ContractBuilder, receiver: string, initialSupply: number)
   }
 }
 
-function addBurnable(c: ContractBuilder, amount?: number,) {
-  c.addParent({
-    name: 'ERC20Burnable',
-    path: '@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol',
-  });
-
-  c.addFunctionCode(`burn(amount, userData)`, functions.burn);
+function addBurnable(c: ContractBuilder, amount?: number, userData?: string) {
+  c.addFunctionCode(`_burn(msg.sender, ${amount}, ${userData});`, functions.burn);
 }
 
 function addMintable(c: ContractBuilder, receiver: string, amount: number, userData?: string) {
-  c.addFunctionCode(`_mint(${receiver}, ${amount}, ${userData})`, functions.mint);
+  c.addFunctionCode(`_mint(${receiver}, ${amount}, ${userData});`, functions.mint);
 }
 
 function addOwnable(c: ContractBuilder) {
@@ -156,6 +155,15 @@ function addRoles(c: ContractBuilder) {
 
 //wtf
 export const functions = {
+  initialize: {
+    kind: 'external' as const,
+    name: 'initialize',
+    args: [
+      { name: 'factory', type: 'address' },
+      { name: 'name', type: 'string memory' },
+      { name: 'symbol', type: 'string memory' },
+    ]
+  },
   _mint: {
     kind: 'internal' as const,
     name: '_mint',
@@ -171,7 +179,7 @@ export const functions = {
     args: [
       { name: 'receiver', type: 'address' },
       { name: 'amount', type: 'uint256' },
-      { name: 'userData', type: 'bytes' },
+      { name: 'userData', type: 'bytes memory' },
     ]
   },
   burn: {
@@ -179,7 +187,7 @@ export const functions = {
     name: 'burn',
     args: [
       { name: 'amount', type: 'uint256' },
-      { name: 'userData', type: 'bytes' },
+      { name: 'userData', type: 'bytes memory' },
     ]
   }
 };

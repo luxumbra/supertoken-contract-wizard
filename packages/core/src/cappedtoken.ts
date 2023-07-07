@@ -8,6 +8,7 @@ export interface CappedSuperTokenOptions extends CommonOptions {
   name: string;
   symbol: string;
   initialSupply: number;
+  maxSupply: number;
   receiver: string;
   mintable: boolean;
   burnable: boolean;
@@ -19,7 +20,8 @@ export interface CappedSuperTokenOptions extends CommonOptions {
 export const cappedSuperTokenDefaults: Required<CappedSuperTokenOptions> = {
   name: 'MyToken',
   symbol: 'MTK',
-  initialSupply: 0,
+  initialSupply: 19,
+  maxSupply: 100,
   receiver: '0x1A6784925814a13334190Fd249ae0333B90b6443',
   access: commonDefaults.access,
   upgradeable: commonDefaults.upgradeable,
@@ -51,7 +53,7 @@ export function buildCappedSuperToken(opts: CappedSuperTokenOptions): Contract {
 
   const { access, info } = allOpts;
 
-  addBase(c, allOpts.name, allOpts.symbol);
+  addBase(c, allOpts.name, allOpts.symbol, allOpts.maxSupply);
 
   if (allOpts.initialSupply > 0) {
     addPremint(c, allOpts.receiver, allOpts.initialSupply);
@@ -60,7 +62,7 @@ export function buildCappedSuperToken(opts: CappedSuperTokenOptions): Contract {
   setInfo(c, info);
 
   if (allOpts.mintable) {
-    addMintable(c, allOpts.receiver, allOpts.initialSupply);
+    addMintable(c, allOpts.receiver, allOpts.initialSupply, allOpts.maxSupply);
   }
 
   if (access === 'ownable') {
@@ -75,13 +77,14 @@ export function buildCappedSuperToken(opts: CappedSuperTokenOptions): Contract {
   return c;
 }
 
-function addBase(c: ContractBuilder, name: string, symbol: string) {
+function addBase(c: ContractBuilder, name: string, symbol: string, maxSupply: number) {
   c.addParent({
     name: 'CappedSuperToken',
     path: 'github.com/superfluid-finance/custom-supertokens/contracts/CappedSuperToken.sol',
   });
 
-  c.addConstructorCode(`_initialize(factory, "${name}", "${symbol}");`);
+  c.addOverride(`_initialize(factory, "${name}", "${symbol}");`, functions.initialize);
+  c.addFunctionCode(`maxSupply = ${maxSupply};`, functions.initialize);
 }
 
 // function formatAmount(amount: number) {
@@ -119,17 +122,13 @@ function addPremint(c: ContractBuilder, receiver: string, initialSupply: number)
       const decimalPlace = decimals.length - exponent;
       const zeroes = new Array(Math.max(0, -decimalPlace)).fill('0').join('');
       const units = integer + decimals + zeroes;
-      const exp = decimalPlace <= 0 ? 'decimals()' : `(decimals() - ${decimalPlace})`;
+      const exp = decimalPlace <= 0 ? '18' : `(18 - ${decimalPlace})`;
       c.addConstructorCode(`_mint(msg.sender, ${units} * 10 ** ${exp});`);
     }
   }
 }
 
 function addOwnable(c: ContractBuilder) {
-  c.addParent({
-    name: 'Ownable',
-    path: '@openzeppelin/contracts/access/Ownable.sol',
-  });
   c.addModifier(`onlyOwner`, functions.mint);
 }
 
@@ -145,15 +144,25 @@ function addRoles(c: ContractBuilder) {
   c.addConstructorCode(`_setupRole(MINTER_ROLE, msg.sender);`);
 }
 
-function addMintable(c: ContractBuilder, receiver: string, amount: number) {
+function addMintable(c: ContractBuilder, receiver: string, amount: number, maxSupply: number) {
   // const preminted = formatAmount(amount);
-  c.addFunctionCode(`if (_totalSupply() + ${amount} > maxSupply) revert SupplyCapped();\n`, functions.mint);
+  c.addFunctionCode(`if (_totalSupply() + ${amount} > ${maxSupply}) revert SupplyCapped();\n`, functions.mint);
   c.addFunctionCode(`_mint(${receiver}, ${amount}, userData);`, functions.mint);
 }
 
 
 //wtf
 export const functions = {
+  initialize: {
+    kind: 'external' as const,
+    name: 'initialize',
+    args: [
+      { name: 'factory', type: 'address' },
+      { name: 'name', type: 'string memory' },
+      { name: 'symbol', type: 'string memory' },
+      { name: '_maxSupply', type: 'uint256' },
+    ],
+  },
   _mint: {
     kind: 'internal' as const,
     name: '_mint',
@@ -169,7 +178,7 @@ export const functions = {
     args: [
       { name: 'receiver', type: 'address' },
       { name: 'amount', type: 'uint256' },
-      { name: 'userData', type: 'bytes' },
+      { name: 'userData', type: 'bytes memory' },
     ]
   },
   burn: {
@@ -177,7 +186,7 @@ export const functions = {
     name: 'burn',
     args: [
       { name: 'amount', type: 'uint256' },
-      { name: 'userData', type: 'bytes' },
+      { name: 'userData', type: 'bytes memory' },
     ]
   }
 };
