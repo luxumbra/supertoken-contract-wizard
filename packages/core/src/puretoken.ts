@@ -8,9 +8,10 @@ export interface PureSuperTokenOptions extends CommonOptions {
   name: string;
   symbol: string;
   initialSupply: number;
+  maxSupply: number;
   receiver: string;
   mintable: boolean;
-  userData?: string;
+  userData: string;
   burnable: boolean;
   capped: boolean;
   ownable: boolean;
@@ -20,7 +21,8 @@ export interface PureSuperTokenOptions extends CommonOptions {
 export const pureSuperTokenDefaults: Required<PureSuperTokenOptions> = {
   name: 'MyToken',
   symbol: 'MTK',
-  initialSupply: 0,
+  initialSupply: 19,
+  maxSupply: 100,
   receiver: 'msg.sender',
   userData: 'userData',
   access: commonDefaults.access,
@@ -84,11 +86,10 @@ function addBase(c: ContractBuilder, name: string, symbol: string, receiver: str
     path: 'github.com/superfluid-finance/custom-supertokens/contracts/PureSuperToken.sol',
   });
 
-  c.addFunctionCode(`_initialize(factory, ${name}, ${symbol});`, functions.initialize);
-  c.addFunctionCode(`_mint(${receiver}, ${amount}, ${userData});`, functions.initialize);
+  c.addOverride(`_initialize(factory, ${name}, ${symbol});`, functions.initialize);
 }
 
-function addPremint(c: ContractBuilder, receiver: string, initialSupply: number) {
+function addPremint(c: ContractBuilder, receiver: string, initialSupply: number, userData?: string) {
   const amount = initialSupply.toString();
   const m = amount.match(premintPattern);
   if (m) {
@@ -100,18 +101,18 @@ function addPremint(c: ContractBuilder, receiver: string, initialSupply: number)
       const decimalPlace = decimals.length - exponent;
       const zeroes = new Array(Math.max(0, -decimalPlace)).fill('0').join('');
       const units = integer + decimals + zeroes;
-      const exp = decimalPlace <= 0 ? 'decimals()' : `(decimals() - ${decimalPlace})`;
-      c.addConstructorCode(`_mint(msg.sender, ${units} * 10 ** ${exp});`);
+      const exp = decimalPlace <= 0 ? '18' : `(18 - ${decimalPlace})`;
+      c.addConstructorCode(`_mint(msg.sender, ${units} * 10 ** ${exp}, ${userData ?? '""'});`);
     }
   }
 }
 
 function addBurnable(c: ContractBuilder, amount?: number, userData?: string) {
-  c.addFunctionCode(`_burn(msg.sender, ${amount}, ${userData});`, functions.burn);
+  c.addFunctionCode(`_burn(msg.sender, amount, userData);`, functions.burn);
 }
 
 function addMintable(c: ContractBuilder, receiver: string, amount: number, userData?: string) {
-  c.addFunctionCode(`_mint(${receiver}, ${amount}, ${userData});`, functions.mint);
+  c.addFunctionCode(`_mint(receiver, amount, userData);`, functions.mint);
 }
 
 function addOwnable(c: ContractBuilder) {
@@ -138,20 +139,6 @@ function addRoles(c: ContractBuilder) {
   c.addConstructorCode(`_setupRole(BURNER_ROLE, msg.sender);`);
 }
 
-
-// function addCapped(c: ContractBuilder) {
-//   c.addParent({
-//     name: 'ERC20Burnable',
-//     path: '@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol',
-//   });
-// }
-
-// function addMaticBridge(c: ContractBuilder) {
-//   c.addParent({
-//     name: 'ERC20Burnable',
-//     path: '@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol',
-//   });
-// }
 
 //wtf
 export const functions = {

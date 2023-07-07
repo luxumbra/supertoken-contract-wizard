@@ -43,6 +43,14 @@
 
     <label class="labeled-input">
       <span class="flex justify-between pr-2">
+        Maximum Supply
+        <HelpTooltip>Speficy the maximum token supply.</HelpTooltip>
+      </span>
+      <input bind:value={opts.maxSupply} type="number" placeholder="0" pattern={premintPattern.source}>
+    </label>
+
+    <label class="labeled-input">
+      <span class="flex justify-between pr-2">
         Receiver
         <HelpTooltip>Create an initial receiver.</HelpTooltip>
       </span>

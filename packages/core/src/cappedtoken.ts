@@ -10,6 +10,7 @@ export interface CappedSuperTokenOptions extends CommonOptions {
   initialSupply: number;
   maxSupply: number;
   receiver: string;
+  userData: string;
   mintable: boolean;
   burnable: boolean;
   capped: boolean;
@@ -22,7 +23,8 @@ export const cappedSuperTokenDefaults: Required<CappedSuperTokenOptions> = {
   symbol: 'MTK',
   initialSupply: 19,
   maxSupply: 100,
-  receiver: '0x1A6784925814a13334190Fd249ae0333B90b6443',
+  receiver: 'msg.sender',
+  userData: 'userData',
   access: commonDefaults.access,
   upgradeable: commonDefaults.upgradeable,
   info: commonDefaults.info,
@@ -80,36 +82,16 @@ export function buildCappedSuperToken(opts: CappedSuperTokenOptions): Contract {
 function addBase(c: ContractBuilder, name: string, symbol: string, maxSupply: number) {
   c.addParent({
     name: 'CappedSuperToken',
-    path: 'github.com/superfluid-finance/custom-supertokens/contracts/CappedSuperToken.sol',
+    path: 'https://github.com/superfluid-finance/custom-supertokens/contracts/CappedSuperToken.sol',
   });
 
   c.addOverride(`_initialize(factory, "${name}", "${symbol}");`, functions.initialize);
   c.addFunctionCode(`maxSupply = ${maxSupply};`, functions.initialize);
 }
 
-// function formatAmount(amount: number) {
-//   const m = amount.toString().match(premintPattern);
-//   let result = ''
-
-//   if (m) {
-//     const integer = m[1]?.replace(/^0+/, '') ?? '';
-//     const decimals = m[2]?.replace(/0+$/, '') ?? '';
-//     const exponent = Number(m[3] ?? 0);
-
-//     if (Number(integer + decimals) > 0) {
-//       const decimalPlace = decimals.length - exponent;
-//       const zeroes = new Array(Math.max(0, -decimalPlace)).fill('0').join('');
-//       const units = integer + decimals + zeroes;
-//       const exp = decimalPlace <= 0 ? 'decimals()' : `(decimals() - ${decimalPlace})`;
-//       result =  `${units} * 10 ** ${exp}`;
-//     }
-//   }
-//   return result;
-// }
-
 export const premintPattern = /^(\d*)(?:\.(\d+))?(?:e(\d+))?$/;
 
-function addPremint(c: ContractBuilder, receiver: string, initialSupply: number) {
+function addPremint(c: ContractBuilder, receiver: string, initialSupply: number, userData?: string) {
   // const amount = formatAmount(initialSupply);
   const amount = initialSupply.toString();
   const m = amount.match(premintPattern);
@@ -123,12 +105,16 @@ function addPremint(c: ContractBuilder, receiver: string, initialSupply: number)
       const zeroes = new Array(Math.max(0, -decimalPlace)).fill('0').join('');
       const units = integer + decimals + zeroes;
       const exp = decimalPlace <= 0 ? '18' : `(18 - ${decimalPlace})`;
-      c.addConstructorCode(`_mint(msg.sender, ${units} * 10 ** ${exp});`);
+      c.addConstructorCode(`_mint(msg.sender, ${units} * 10 ** ${exp}, ${userData ?? '""'});`);
     }
   }
 }
 
 function addOwnable(c: ContractBuilder) {
+  // c.addParent({
+  //   name: 'Ownable',
+  //   path: '@openzeppelin/contracts/access/Ownable.sol',
+  // });
   c.addModifier(`onlyOwner`, functions.mint);
 }
 
@@ -147,7 +133,7 @@ function addRoles(c: ContractBuilder) {
 function addMintable(c: ContractBuilder, receiver: string, amount: number, maxSupply: number) {
   // const preminted = formatAmount(amount);
   c.addFunctionCode(`if (_totalSupply() + ${amount} > ${maxSupply}) revert SupplyCapped();\n`, functions.mint);
-  c.addFunctionCode(`_mint(${receiver}, ${amount}, userData);`, functions.mint);
+  c.addFunctionCode(`_mint(receiver, amount, userData);`, functions.mint);
 }
 
 

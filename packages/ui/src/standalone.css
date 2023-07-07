@@ -53,9 +53,9 @@ body {
   flex-direction: row;
   min-width: 800px;
 }
-.header img {
+/* .header img {
   margin: 0 2rem 0;
-}
+} */
 
 .header .switch {
   --color-1: var(--solidity-blue-1);

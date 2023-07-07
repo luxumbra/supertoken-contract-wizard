@@ -25,9 +25,9 @@
   --red-1: #feecec;
   --red-2: #f53d3d;
   --red-3: #aa0909;
-  
-  --solidity-blue-1: rgb(16, 187, 53);
-  --solidity-blue-2: rgb(16, 187, 53);
+
+  --solidity-blue-1: rgb(0,0,0);
+  --solidity-blue-2: rgb(0,0,0);
 
   --cairo-orange-1: #fe9149;
   --cairo-orange-2: #fe4a3c;

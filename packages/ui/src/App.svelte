@@ -133,6 +133,7 @@
 
 
 <div class="container flex flex-col gap-4 p-4">
+  <div class="flex flex-col gap-4">
   {#if $connected}
   <p>Connected to Ethereum</p>
   {:else}
@@ -158,13 +159,16 @@
   <p>Signer address not yet available</p>
   {/if}
   {#if $web3Modal}
+  <div class="max-w-2xl">
   <button on:click={$web3Modal.openModal}>
   Connect to Ethereum
   </button>
+  </div>
   {:else}
 
     <p>Web3Modal not yet available</p>
   {/if}
+  </div>
   <div class="header flex flex-row justify-between">
     <div class="tab overflow-hidden">
       <OverflowMenu>
