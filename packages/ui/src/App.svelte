@@ -3,34 +3,30 @@
     import { connected } from 'svelte-wagmi';
     import hljs from './highlightjs';
 
-    import Dropdown from './Dropdown.svelte';
-    import OverflowMenu from './OverflowMenu.svelte';
-    import Tooltip from './Tooltip.svelte';
-    import CheckIcon from './icons/CheckIcon.svelte';
-    import CopyIcon from './icons/CopyIcon.svelte';
-    import DownloadIcon from './icons/DownloadIcon.svelte';
-    import FileIcon from './icons/FileIcon.svelte';
-    import RemixIcon from './icons/RemixIcon.svelte';
-    import ZipIcon from './icons/ZipIcon.svelte';
-    import CappedSuperTokenControls from './CappedSuperTokenControls.svelte';
-    import MaticBridgedSuperTokenControls from './MaticBridgedSuperTokenControls.svelte';
     import type { Contract, Kind, KindedOptions, OptionsErrorMessages } from '@superfluid-wizard/core';
     import { ContractBuilder, OptionsError, buildGeneric, printContract, sanitizeKind } from '@superfluid-wizard/core';
+    import { saveAs } from 'file-saver';
+    import { copy } from 'svelte-copy';
+    import { chainId, configureWagmi, signerAddress, wagmiLoaded, web3Modal } from 'svelte-wagmi';
+    import CappedSuperTokenControls from './CappedSuperTokenControls.svelte';
+    import Dropdown from './Dropdown.svelte';
+    import MaticBridgedSuperTokenControls from './MaticBridgedSuperTokenControls.svelte';
+    import OverflowMenu from './OverflowMenu.svelte';
+    import PureSuperTokenControls from './PureSuperTokenControls.svelte';
+    import Tooltip from './Tooltip.svelte';
+    import CheckIcon from './icons/CheckIcon.svelte';
+    import CompileIcon from './icons/CompileIcon.svelte';
+    import CopyIcon from './icons/CopyIcon.svelte';
+    import DeployIcon from './icons/DeployIcon.svelte';
+    import DownloadIcon from './icons/DownloadIcon.svelte';
+    import FileIcon from './icons/FileIcon.svelte';
+    import ProcessingIcon from './icons/ProcessingIcon.svelte';
+    import RemixIcon from './icons/RemixIcon.svelte';
+    import ZipIcon from './icons/ZipIcon.svelte';
     import { postConfig } from './post-config';
     import { remixURL } from './remix';
-    import { wagmiLoaded } from 'svelte-wagmi';
-    import { saveAs } from 'file-saver';
-    import { chainId } from 'svelte-wagmi';
-    import PureSuperTokenControls from './PureSuperTokenControls.svelte';
+    import { CompileContractProps, compileContract } from './utils/contract-utils';
     import { injectHyperlinks } from './utils/inject-hyperlinks';
-    import { signerAddress } from 'svelte-wagmi';
-    import { web3Modal } from 'svelte-wagmi';
-    import { configureWagmi } from 'svelte-wagmi';
-    import { copy } from 'svelte-copy';
-    import CompileIcon from './icons/CompileIcon.svelte';
-    import DeployIcon from './icons/DeployIcon.svelte';
-    import { CompileContractProps, compileContract, deployContract } from './utils/contract-utils';
-  import ProcessingIcon from './icons/ProcessingIcon.svelte';
 
     configureWagmi({
       walletconnect: true,
@@ -158,40 +154,59 @@
 </script>
 
 
-<div class="container flex flex-col gap-4 p-4">
-  <div class="flex flex-col gap-4">
-  {#if $connected}
-  <p>Connected to Ethereum</p>
-  {:else}
-  <p>Not connected to Ethereum</p>
-  {/if}
-  {#if $wagmiLoaded}
-  <p>@wagmi/core is loaded and initialized</p>
-  {:else}
-  <p>@wagmi/core is not yet loaded</p>
-  {/if}
-  {#if $chainId}
-  <p>Current chain ID: {$chainId}</p>
-  {:else}
-  <p>Chain ID not yet available</p>
-  {/if}
-  {#if $signerAddress}
-  <p>Current signer address: {$signerAddress} <button
-    class="copy-button"
-    use:copy={$signerAddress}
-    on:svelte-copy={(event) => alert(`Copied ${$signerAddress} to clipboard`)}
-    ><CopyIcon /></button></p>
-  {:else}
-  <p>Signer address not yet available</p>
-  {/if}
-  {#if $web3Modal}
-  <div class="max-w-2xl">
-  <button on:click={$web3Modal.openModal}>
-  Connect to Ethereum
-  </button>
+<div class="container flex flex-col gap-8 p-4">
+  <div class="flex items-center justify-between gap-4">
+    {#if $wagmiLoaded}
+    <div>
+      <p class="font-bold">@wagmi/core status</p>
+      <p>loaded and initialized</p>
+    </div>
+    {:else}
+    <div>
+      <p class="font-bold">@wagmi/core status</p>
+      <p>not yet loaded</p>
+    </div>
+    {/if}
+    {#if $chainId}
+    <div>
+      <p class="font-bold">Current chain ID</p>
+      <p>{$chainId}</p>
+    </div>
+    {:else}
+    <div>
+      <p class="font-bold">Current chain ID</p>
+      <p>Chain ID not yet available</p>
+    </div>
+    {/if}
+    {#if $signerAddress}
+    <div>
+      <p class="font-bold">Current signer address</p>
+      <p>
+        {$signerAddress}
+        <button
+        class="copy-button"
+        use:copy={$signerAddress}
+        on:svelte-copy={(event) => alert(`Copied ${$signerAddress} to clipboard`)}
+        ><CopyIcon /></button>
+        </p>
+    </div>
+    {:else}
+    <div>
+      <p class="font-bold">Current signer address</p>
+      <p>Signer address not yet available</p>
+    </div>
+    {/if}
+    {#if $web3Modal}
+    <div class="max-w-2xl">
+    <button class="primary-button" on:click={$web3Modal.openModal}>
+      {#if $connected}
+        Connected
+      {:else}
+        Connect Wallet
+      {/if}
+    </button>
   </div>
   {:else}
-
     <p>Web3Modal not yet available</p>
   {/if}
   </div>
@@ -404,7 +419,7 @@
     color: var(--gray-5);
   }
 
-  .tab button, .action-button, :global(.overflow-btn) {
+  .tab button, .action-button, .primary-button, :global(.overflow-btn) {
     padding: var(--size-2) var(--size-3);
     border-radius: 6px;
     font-weight: bold;
@@ -457,9 +472,37 @@
     }
   }
 
+  .primary-button {
+    background-color: var(--green-1);
+    border: 1px solid var(--green-1);
+    color: var(--gray-1);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+
+    &:hover {
+      background-color: var(--green-2);
+    }
+
+    &:active, &.active {
+      background-color: var(--green-2);
+    }
+
+    &.disabled {
+      color: var(--gray-4);
+    }
+
+    :global(.icon) {
+      margin-right: var(--size-1);
+      width: auto;
+      height: 20px;
+    }
+  }
+
   .copy-button {
     background-color: transparent;
     border: none ;
+    cursor: pointer;
   }
 
   .controls {
