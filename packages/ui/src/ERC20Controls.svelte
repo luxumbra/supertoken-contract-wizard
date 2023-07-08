@@ -1,8 +1,8 @@
 <script lang="ts">
   import HelpTooltip from './HelpTooltip.svelte';
 
-  import type { KindedOptions } from '@openzeppelin/wizard';
-  import { erc20, premintPattern, infoDefaults } from '@openzeppelin/wizard';
+  import type { KindedOptions } from '@superfluid-wizard/core';
+  import { erc20, premintPattern, infoDefaults } from '@superfluid-wizard/core';
 
   import AccessControlSection from './AccessControlSection.svelte';
   import UpgradeabilitySection from './UpgradeabilitySection.svelte';

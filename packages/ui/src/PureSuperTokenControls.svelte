@@ -1,9 +1,9 @@
 <script lang="ts">
 
-  import type { KindedOptions } from '@openzeppelin/wizard';
-  import { infoDefaults, premintPattern } from '@openzeppelin/wizard';
-  import { pureSuperToken } from '@openzeppelin/wizard/src/api';
-  import { pureSuperTokenDefaults } from '@openzeppelin/wizard/src/puretoken';
+  import type { KindedOptions } from '@superfluid-wizard/core';
+  import { infoDefaults, premintPattern } from '@superfluid-wizard/core';
+  import { pureSuperToken } from '@superfluid-wizard/core/src/api';
+  import { pureSuperTokenDefaults } from '@superfluid-wizard/core/src/puretoken';
   import AccessControlSection from './AccessControlSection.svelte';
   import HelpTooltip from './HelpTooltip.svelte';
   import InfoSection from './InfoSection.svelte';

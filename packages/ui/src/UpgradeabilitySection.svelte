@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Upgradeable } from '@openzeppelin/wizard';
+  import type { Upgradeable } from '@superfluid-wizard/core';
 
   import ToggleRadio from './inputs/ToggleRadio.svelte';
   import HelpTooltip from './HelpTooltip.svelte';

@@ -2,7 +2,7 @@ import { CommonOptions, defaults as commonDefaults, withCommonDefaults } from '.
 import { BaseFunction, Contract, ContractBuilder } from './contract';
 import { printContract } from './print';
 import { setInfo } from './set-info';
-// import { premintPattern } from '@openzeppelin/wizard';
+// import { premintPattern } from '@superfluid-wizard/core';
 
 export interface CappedSuperTokenOptions extends CommonOptions {
   name: string;

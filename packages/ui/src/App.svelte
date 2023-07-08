@@ -14,8 +14,8 @@
     import ZipIcon from './icons/ZipIcon.svelte';
     import CappedSuperTokenControls from './CappedSuperTokenControls.svelte';
     import MaticBridgedSuperTokenControls from './MaticBridgedSuperTokenControls.svelte';
-    import type { Contract, Kind, KindedOptions, OptionsErrorMessages } from '@openzeppelin/wizard';
-    import { ContractBuilder, OptionsError, buildGeneric, printContract, sanitizeKind } from '@openzeppelin/wizard';
+    import type { Contract, Kind, KindedOptions, OptionsErrorMessages } from '@superfluid-wizard/core';
+    import { ContractBuilder, OptionsError, buildGeneric, printContract, sanitizeKind } from '@superfluid-wizard/core';
     import { postConfig } from './post-config';
     import { remixURL } from './remix';
     import { wagmiLoaded } from 'svelte-wagmi';
@@ -27,7 +27,10 @@
     import { web3Modal } from 'svelte-wagmi';
     import { configureWagmi } from 'svelte-wagmi';
     import { copy } from 'svelte-copy';
-
+    import CompileIcon from './icons/CompileIcon.svelte';
+    import DeployIcon from './icons/DeployIcon.svelte';
+    import { CompileContractProps, compileContract, deployContract } from './utils/contract-utils';
+  import ProcessingIcon from './icons/ProcessingIcon.svelte';
 
     configureWagmi({
       walletconnect: true,
@@ -89,7 +92,7 @@
       e.preventDefault();
       if ((e.target as Element)?.classList.contains('disabled')) return;
 
-      const { printContractVersioned } = await import('@openzeppelin/wizard/print-versioned');
+      const { printContractVersioned } = await import('@superfluid-wizard/core/print-versioned');
 
       const versionedCode = printContractVersioned(contract);
       window.open(remixURL(versionedCode, !!opts?.upgradeable).toString(), '_blank');
@@ -106,7 +109,7 @@
       }
     };
 
-    const zipModule = import('@openzeppelin/wizard/zip');
+    const zipModule = import('@superfluid-wizard/core/zip');
 
     const downloadVendoredHandler = async () => {
       const { zipContract } = await zipModule;
@@ -118,7 +121,7 @@
       }
     };
 
-    const zipEnvModule = import('@openzeppelin/wizard/zip-env');
+    const zipEnvModule = import('@superfluid-wizard/core/zip-env');
 
     const downloadHardhatHandler = async () => {
       const { zipHardhat } = await zipEnvModule;
@@ -128,6 +131,29 @@
       if (opts) {
         await postConfig(opts, 'download-hardhat', language);
       }
+    };
+
+    let compiling = false;
+    const compileContractHandler = async () => {
+      console.log('compileContractHandler()', code, opts?.name);
+      if (!opts) return false;
+      const compileData: CompileContractProps = {
+        contractData: code,
+        contractName: opts.name
+      };
+
+      compiling = true;
+      const { abi, bytecode, success, error } = await compileContract(compileData);
+
+      if (success) {
+        console.log('compileContractHandler success', { abi, bytecode });
+        compiling = false;
+      } else {
+        console.log('compileContractHandler error', { error });
+        compiling = false;
+      }
+
+      return success;
     };
 </script>
 
@@ -204,11 +230,69 @@
           Copy to Clipboard
         {/if}
       </button>
-
+      <Tooltip
+        let:trigger
+        theme="border"
+        hideOnClick={false}
+        interactive
+      >
+        <button
+          use:trigger
+          class="action-button"
+          on:click={compileContractHandler}
+        >
+          {#if compiling}
+            <ProcessingIcon />
+            Compiling
+          {:else}
+          <CompileIcon />
+          Compile contract
+          {/if}
+        </button>
+        <div slot="content">
+          Compile this contract.
+        </div>
+      </Tooltip>
+      <Tooltip
+        let:trigger
+        theme="border"
+        hideOnClick={false}
+        interactive
+      >
+        <button
+          use:trigger
+          class="action-button"
+          on:click={downloadVendoredHandler}
+        >
+          <CopyIcon />
+          Copy Artefacts
+        </button>
+        <div slot="content">
+          Copy the artefacts for this contract.
+        </div>
+      </Tooltip>
+      <Tooltip
+        let:trigger
+        theme="border"
+        hideOnClick={false}
+        interactive
+        >
+        <button
+          use:trigger
+          class="action-button"
+          on:click={downloadHardhatHandler}
+        >
+          <DeployIcon />
+          Deploy Project
+        </button>
+        <div slot="content">
+          Deploy this contract.
+        </div>
+      </Tooltip>
       <Tooltip
         let:trigger
         disabled={!(opts?.upgradeable === "transparent")}
-        theme="light-red border"
+        theme="border"
         hideOnClick={false}
         interactive
       >
@@ -351,6 +435,8 @@
     border: 1px solid var(--gray-3);
     color: var(--gray-6);
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
 
     &:hover {
       background-color: var(--gray-2);
@@ -366,6 +452,8 @@
 
     :global(.icon) {
       margin-right: var(--size-1);
+      width: auto;
+      height: 20px;
     }
   }
 

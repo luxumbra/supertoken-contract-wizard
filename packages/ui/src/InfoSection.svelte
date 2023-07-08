@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { Info } from '@openzeppelin/wizard';
-  import { infoDefaults } from '@openzeppelin/wizard';
+  import type { Info } from '@superfluid-wizard/core';
+  import { infoDefaults } from '@superfluid-wizard/core';
 
   import HelpTooltip from './HelpTooltip.svelte';
 

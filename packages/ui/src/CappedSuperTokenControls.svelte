@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { KindedOptions } from '@openzeppelin/wizard';
-  import { infoDefaults, premintPattern } from '@openzeppelin/wizard';
-  import { cappedSuperToken } from '@openzeppelin/wizard/src/api';
-  import { cappedSuperTokenDefaults } from '@openzeppelin/wizard/src/cappedtoken';
+  import type { KindedOptions } from '@superfluid-wizard/core';
+  import { infoDefaults, premintPattern } from '@superfluid-wizard/core';
+  import { cappedSuperToken } from '@superfluid-wizard/core/src/api';
+  import { cappedSuperTokenDefaults } from '@superfluid-wizard/core/src/cappedtoken';
 
   import AccessControlSection from './AccessControlSection.svelte';
   import HelpTooltip from './HelpTooltip.svelte';

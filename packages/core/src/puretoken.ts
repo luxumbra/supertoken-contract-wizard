@@ -86,7 +86,8 @@ function addBase(c: ContractBuilder, name: string, symbol: string, receiver: str
     path: 'github.com/superfluid-finance/custom-supertokens/contracts/PureSuperToken.sol',
   });
 
-  c.addOverride(`_initialize(factory, ${name}, ${symbol});`, functions.initialize);
+  c.addOverride(name, functions.initialize);
+  c.addConstructorCode(`_initialize(factory, "${name}", "${symbol}");`);
 }
 
 function addPremint(c: ContractBuilder, receiver: string, initialSupply: number, userData?: string) {
@@ -102,7 +103,7 @@ function addPremint(c: ContractBuilder, receiver: string, initialSupply: number,
       const zeroes = new Array(Math.max(0, -decimalPlace)).fill('0').join('');
       const units = integer + decimals + zeroes;
       const exp = decimalPlace <= 0 ? '18' : `(18 - ${decimalPlace})`;
-      c.addConstructorCode(`_mint(msg.sender, ${units} * 10 ** ${exp}, ${userData ?? '""'});`);
+      c.addConstructorCode(`_mint(${receiver}, ${units} * 10 ** ${exp}, ${userData ?? '""'});`);
     }
   }
 }
@@ -149,6 +150,8 @@ export const functions = {
       { name: 'factory', type: 'address' },
       { name: 'name', type: 'string memory' },
       { name: 'symbol', type: 'string memory' },
+      { name: 'receiver', type: 'address' },
+      { name: 'initialSupply', type: 'uint256' },
     ]
   },
   _mint: {

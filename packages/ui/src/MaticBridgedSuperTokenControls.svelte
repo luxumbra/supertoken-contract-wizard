@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { KindedOptions } from '@openzeppelin/wizard';
-  import { infoDefaults, premintPattern } from '@openzeppelin/wizard';
-  import { maticBridgedSuperToken } from '@openzeppelin/wizard/src/api';
-  import { maticBridgedSuperTokenDefaults } from '@openzeppelin/wizard/src/maticbridged';
+  import type { KindedOptions } from '@superfluid-wizard/core';
+  import { infoDefaults, premintPattern } from '@superfluid-wizard/core';
+  import { maticBridgedSuperToken } from '@superfluid-wizard/core/src/api';
+  import { maticBridgedSuperTokenDefaults } from '@superfluid-wizard/core/src/maticbridged';
 
   import AccessControlSection from './AccessControlSection.svelte';
   import HelpTooltip from './HelpTooltip.svelte';
