@@ -31,6 +31,7 @@
     import DeployIcon from './icons/DeployIcon.svelte';
     import { CompileContractProps, compileContract, deployContract } from './utils/contract-utils';
   import ProcessingIcon from './icons/ProcessingIcon.svelte';
+  import { error } from './error-tooltip';
 
     configureWagmi({
       walletconnect: true,
@@ -134,9 +135,11 @@
     };
 
     let compiling = false;
-    const compileContractHandler = async () => {
+    let deploying = false;
+    let contractError: string | undefined = undefined;
+    const compileContractHandler = async (): Promise<void> => {
       console.log('compileContractHandler()', code, opts?.name);
-      if (!opts) return false;
+      if (!opts) return;
       const compileData: CompileContractProps = {
         contractData: code,
         contractName: opts.name
@@ -151,9 +154,9 @@
       } else {
         console.log('compileContractHandler error', { error });
         compiling = false;
+        contractError = error;
       }
-
-      return success;
+      return;
     };
 </script>
 
@@ -238,7 +241,7 @@
       >
         <button
           use:trigger
-          class="action-button"
+          class={`action-button ${contractError ?? 'text-red-500'}`}
           on:click={compileContractHandler}
         >
           {#if compiling}
@@ -352,6 +355,9 @@
       </Dropdown>
     </div>
   </div>
+  {#if contractError}
+  <pre class="text-red-500 text-sm"><code>{contractError}</code></pre>
+  {/if}
 
   <div class="flex flex-row gap-4 grow">
     <div class="controls w-64 flex flex-col shrink-0 justify-between">

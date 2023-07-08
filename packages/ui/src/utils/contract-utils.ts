@@ -88,10 +88,7 @@ export const compileContract = async (compileData: CompileContractProps): Promis
   const { contractData, contractName } = compileData;
   console.log('compileContract() compileData...', { contractData, contractName });
 
-
   try {
-    // take the data string and replace the pragma version with 0.8.0
-    // this is a hack to get around the fact that the compiler version is not specified in the contract data
     const reformattedContract = adjustSolidityCode(contractData)
 
     console.log('compileContract() replaced...', reformattedContract);
@@ -106,18 +103,25 @@ export const compileContract = async (compileData: CompileContractProps): Promis
       body: JSON.stringify({ name: contractName, code: reformattedContract })
     });
 
-    const { abi, bytecode } = await response.json();
+    const resData = await response.json();
+    const { abi, bytecode, error:resError } = resData;
+
     const success = response.ok;
 
-    return {
-      abi,
-      bytecode,
-      success
-    };
+    if (success) {
+      return {
+        abi,
+        bytecode,
+        success
+      };
+    } else {
+      throw new Error(resError);
+    }
+
+
 
   } catch (error: any) {
-    console.error(error);
-    console.log(error.message);
+    console.error('Compile error: ', error);
     return {
       abi: '',
       bytecode: '',
