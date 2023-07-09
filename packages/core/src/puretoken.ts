@@ -55,18 +55,20 @@ export function buildPureSuperToken(opts: PureSuperTokenOptions): Contract {
 
   const { access, info } = allOpts;
 
-  addBase(c, allOpts.name, allOpts.symbol, allOpts.receiver, allOpts.initialSupply, allOpts.userData);
+  addBase(c, allOpts.name, allOpts.symbol);
 
-  if (allOpts.initialSupply > 0) addPremint(c, allOpts.receiver, allOpts.initialSupply);
+  if (allOpts.initialSupply > 0) {
+    addPremint(c, allOpts.receiver, allOpts.initialSupply);
+  }
 
   setInfo(c, info);
 
-  if (allOpts.burnable) {
-    addBurnable(c, allOpts.initialSupply, allOpts.userData);
-  }
-
   if (allOpts.mintable) {
     addMintable(c, allOpts.receiver, allOpts.initialSupply, allOpts.userData);
+  }
+
+  if (allOpts.burnable) {
+    addBurnable(c, allOpts.initialSupply, allOpts.userData);
   }
 
   if (access === 'ownable') {
@@ -80,15 +82,16 @@ export function buildPureSuperToken(opts: PureSuperTokenOptions): Contract {
   return c;
 }
 
-function addBase(c: ContractBuilder, name: string, symbol: string, receiver: string, amount: number, userData?: string) {
+function addBase(c: ContractBuilder, name: string, symbol: string) {
   c.addParent({
     name: 'PureSuperToken',
     path: 'github.com/superfluid-finance/custom-supertokens/contracts/PureSuperToken.sol',
   });
 
-  c.addOverride(name, functions.initialize);
-  c.addConstructorCode(`_initialize(factory, "${name}", "${symbol}");`);
+  c.addOverride(`_initialize(factory, "${name}", "${symbol}");`, functions.initialize);
 }
+
+
 
 function addPremint(c: ContractBuilder, receiver: string, initialSupply: number, userData?: string) {
   const amount = initialSupply.toString();

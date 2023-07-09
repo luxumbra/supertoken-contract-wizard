@@ -82,7 +82,7 @@ export function buildCappedSuperToken(opts: CappedSuperTokenOptions): Contract {
 function addBase(c: ContractBuilder, name: string, symbol: string, maxSupply: number) {
   c.addParent({
     name: 'CappedSuperToken',
-    path: 'https://github.com/superfluid-finance/custom-supertokens/contracts/CappedSuperToken.sol',
+    path: 'github.com/superfluid-finance/custom-supertokens/contracts/CappedSuperToken.sol',
   });
 
   c.addOverride(`_initialize(factory, "${name}", "${symbol}");`, functions.initialize);
@@ -111,10 +111,6 @@ function addPremint(c: ContractBuilder, receiver: string, initialSupply: number,
 }
 
 function addOwnable(c: ContractBuilder) {
-  // c.addParent({
-  //   name: 'Ownable',
-  //   path: '@openzeppelin/contracts/access/Ownable.sol',
-  // });
   c.addModifier(`onlyOwner`, functions.mint);
 }
 
