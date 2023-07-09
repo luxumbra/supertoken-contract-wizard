@@ -1,27 +1,25 @@
 <script lang="ts">
-  
-  import type { KindedOptions } from '@openzeppelin/wizard';
-  import { infoDefaults, premintPattern } from '@openzeppelin/wizard';
-  import { pureSupertoken } from '@openzeppelin/wizard/src/api';
-  import { pureSupertokenDefaults } from '@openzeppelin/wizard/src/puretoken';
+  import type { KindedOptions } from '@superfluid-wizard/core';
+  import { infoDefaults, premintPattern } from '@superfluid-wizard/core';
+  import { maticBridgedSuperToken } from '@superfluid-wizard/core/src/api';
+  import { maticBridgedSuperTokenDefaults } from '@superfluid-wizard/core/src/maticbridged';
+
   import AccessControlSection from './AccessControlSection.svelte';
   import HelpTooltip from './HelpTooltip.svelte';
   import InfoSection from './InfoSection.svelte';
   import UpgradeabilitySection from './UpgradeabilitySection.svelte';
 
-  export const opts: Required<KindedOptions['PURE']> = {
-    kind: 'PURE',
-    ...pureSupertokenDefaults,
+  export const opts: Required<KindedOptions['MaticBridged']> = {
+    kind: 'MaticBridged',
+    ...maticBridgedSuperTokenDefaults,
     info: { ...infoDefaults }, // create new object since Info is nested
   };
 
-  console.log(opts,'opts');
-
-  $: requireAccessControl = pureSupertoken.isAccessControlRequired(opts);
+  $: requireAccessControl = maticBridgedSuperToken.isAccessControlRequired(opts);
 </script>
 
 <section class="controls-section">
-  <h1>Settings</h1>
+  <h2>Settings</h2>
 
     <div class="grid grid-cols-[2fr,1fr] gap-2">
       <label class="labeled-input">
@@ -33,7 +31,6 @@
         <span>Symbol</span>
         <input bind:value={opts.symbol}>
       </label>
-
     </div>
 
     <label class="labeled-input">
@@ -41,9 +38,9 @@
         Premint
         <HelpTooltip>Create an initial amount of tokens for the deployer.</HelpTooltip>
       </span>
-      <input bind:value={opts.initialSupply} placeholder="0" pattern={premintPattern.source}>
+      <input bind:value={opts.initialSupply} type="number" placeholder="0" pattern={premintPattern.source}>
     </label>
-          
+
     <label class="labeled-input">
       <span class="flex justify-between pr-2">
         Receiver
@@ -54,7 +51,7 @@
 </section>
 
 <section class="controls-section">
-  <h1>Features</h1>
+  <h2>Features</h2>
 
   <div class="checkbox-group">
     <label class:checked={opts.mintable}>
@@ -62,14 +59,6 @@
       Mintable
       <HelpTooltip>
         Privileged accounts will be able to create more supply.
-      </HelpTooltip>
-    </label>
-
-    <label class:checked={opts.burnable}>
-      <input type="checkbox" bind:checked={opts.burnable}>
-      Burnable
-      <HelpTooltip>
-        Token holders will be able to destroy their tokens.
       </HelpTooltip>
     </label>
   </div>

@@ -29,8 +29,9 @@ import {
   isAccessControlRequired as governorIsAccessControlRequired,
   printGovernor,
 } from './governor';
-import { pureSupertokenDefaults, printPureSuperToken, type PureSuperTokenOptions } from './puretoken';
-import { cappedSupertokenDefaults, printCappedSuperToken, type CappedSuperTokenOptions } from './cappedtoken';
+import { pureSuperTokenDefaults, printPureSuperToken, type PureSuperTokenOptions } from './puretoken';
+import { cappedSuperTokenDefaults, printCappedSuperToken, type CappedSuperTokenOptions } from './cappedtoken';
+import { MaticBridgedSuperTokenOptions, maticBridgedSuperTokenDefaults, printMaticBridgedSuperToken } from './maticbridged';
 
 export interface WizardContractAPI<Options extends CommonOptions> {
 	/**
@@ -55,11 +56,12 @@ export type ERC721 = WizardContractAPI<ERC721Options>;
 export type ERC1155 = WizardContractAPI<ERC1155Options>;
 export type Governor = WizardContractAPI<GovernorOptions>;
 export type CappedSuperToken = WizardContractAPI<CappedSuperTokenOptions>;
+export type MaticBridgedSuperToken = WizardContractAPI<MaticBridgedSuperTokenOptions>;
 export type Custom = WizardContractAPI<CustomOptions>;
 
-export const pureSupertoken: PureSuperToken = {
+export const pureSuperToken: PureSuperToken = {
 	print: printPureSuperToken,
-	defaults: pureSupertokenDefaults,
+	defaults: pureSuperTokenDefaults,
 	isAccessControlRequired: erc20IsAccessControlRequired,
 };
 export const erc20: ERC20 = {
@@ -82,9 +84,14 @@ export const governor: Governor = {
 	defaults: governorDefaults,
 	isAccessControlRequired: governorIsAccessControlRequired,
 };
-export const cappedSupertoken: CappedSuperToken = {
+export const cappedSuperToken: CappedSuperToken = {
 	print: printCappedSuperToken,
-	defaults: cappedSupertokenDefaults,
+	defaults: cappedSuperTokenDefaults,
+	isAccessControlRequired: erc20IsAccessControlRequired,
+};
+export const maticBridgedSuperToken: MaticBridgedSuperToken = {
+	print: printMaticBridgedSuperToken,
+	defaults: maticBridgedSuperTokenDefaults,
 	isAccessControlRequired: erc20IsAccessControlRequired,
 };
 export const custom: Custom = {

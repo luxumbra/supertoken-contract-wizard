@@ -4,7 +4,7 @@
   ],
   "packageRules": [
     {
-      "matchPackagePrefixes": ["@openzeppelin/"],
+      "matchPackagePrefixes": ["@openzeppelin/", "@superfluid/"],
       "schedule": ["at any time"],
       "rangeStrategy": "update-lockfile"
     }
