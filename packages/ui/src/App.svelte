@@ -154,6 +154,7 @@
     let compiling = false;
     let compiled = false;
     let deploying = false;
+    let erroring = false;
     let contractError: string | undefined = undefined;
     let contractAbi: string | undefined = undefined;
     let contractBytecode: string | undefined = undefined;
@@ -185,10 +186,10 @@
       console.log('compileContractHandler', { compiledData });
 
       const { abi, bytecode, artifacts, success, error } = compiledData;
-      console.log('compileContractHandler destructured', { abi, bytecode, success, error });
+      // console.log('compileContractHandler destructured', { abi, bytecode, success, error });
 
       if (success) {
-        console.log('compileContractHandler success', { abi, bytecode });
+        // console.log('compileContractHandler success', { abi, bytecode });
         contractAbi = abi;
         contractBytecode = bytecode;
         contractArtifacts = artifacts;
@@ -199,10 +200,15 @@
           compiled = false;
         }, 2000);
       } else {
+        erroring = true;
         console.log('compileContractHandler error', { error });
         compiling = false;
         compiled = false;
         contractError = error;
+        setTimeout(() => {
+          erroring = false;
+          contractError = undefined;
+        }, 2000);
       }
       return;
     };
@@ -215,7 +221,8 @@
         deploying = true;
         const deployData: DeployContractProps = {
           abi: contractAbi,
-          bytecode: contractBytecode
+          bytecode: contractBytecode,
+          name: opts?.name,
         };
         const deployedContractData = await deployContract(deployData);
 
@@ -230,8 +237,6 @@
         deploying = false;
         return;
       }
-
-
     }
 
 </script>
@@ -332,13 +337,13 @@
           use:trigger
           class="action-button"
           on:click={() => contractArtifacts && handleCopy(contractArtifacts)}
-          disabled={!contractArtifacts}
+          disabled={contractArtifacts === undefined}
         >
           <CopyIcon />
           Copy Artifacts
         </button>
         <div slot="content">
-          Copy the artefacts for this contract.
+          Copy the artifacts for this contract.
         </div>
       </Tooltip>
       <Tooltip
@@ -351,6 +356,7 @@
           use:trigger
           class="action-button"
           on:click={deployContractHandler}
+          disabled={contractArtifacts === undefined}
         >
           {#if deploying}
             <ProcessingIcon />
@@ -361,7 +367,11 @@
           {/if}
         </button>
         <div slot="content">
+          {#if contractArtifacts}
           Deploy this contract on <i class="text-green-400 capitalize">{$chainName}</i> network.
+          {:else}
+          Please compile your contract before you deploy it.
+          {/if}
         </div>
       </Tooltip>
       <Tooltip
@@ -406,7 +416,7 @@
         </button>
 
         {#if opts?.kind !== "Governor"}
-        <button class="download-option" on:click={downloadHardhatHandler}>
+        <button class="download-option" on:click={downloadHardhatHandler} disabled>
           <ZipIcon />
           <div class="download-option-content">
             <p>Development Package (Hardhat)</p>
@@ -415,7 +425,7 @@
         </button>
         {/if}
 
-        <button class="download-option" on:click={downloadVendoredHandler}>
+        <button class="download-option" on:click={downloadVendoredHandler} disabled>
           <ZipIcon />
           <div class="download-option-content">
             <p>Vendored ZIP</p>
@@ -427,11 +437,11 @@
       </Dropdown>
     </div>
   </div>
-  {#if contractError}
-  <pre class="text-red-500 text-sm"><code>{contractError}</code></pre>
+  {#if erroring}
+  <p class="text-red-500 text-sm text-center">Error. Please check the console for details.</p>
   {/if}
   {#if compiled}
-    <p class="text-green-500">{`${opts?.name} successfully compiled.`}</p>
+    <p class="text-green-500 text-sm text-center">{`${opts?.name} successfully compiled.`}</p>
   {/if}
 
   <div class="flex flex-row gap-4 grow">
@@ -512,7 +522,9 @@
       background-color: var(--gray-2);
     }
 
-    &.disabled {
+    &.disabled,
+    &:disabled,
+    &[disabled] {
       color: var(--gray-4);
     }
 
@@ -587,6 +599,17 @@
     &:focus, {
       background-color: var(--gray-1);
       border: 1px solid var(--gray-3);
+    }
+
+    &[disabled] {
+      color: var(--gray-4);
+      cursor: not-allowed;
+
+      &:hover,
+      &:focus {
+        background-color: transparent;
+        border: 1px solid transparent;
+      }
     }
 
     & div {
