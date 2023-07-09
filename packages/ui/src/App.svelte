@@ -6,7 +6,6 @@
     import type { Contract, Kind, KindedOptions, OptionsErrorMessages } from '@superfluid-wizard/core';
     import { ContractBuilder, OptionsError, buildGeneric, printContract, sanitizeKind } from '@superfluid-wizard/core';
     import { saveAs } from 'file-saver';
-    import { copy } from 'svelte-copy';
     import { chainId, configureWagmi, signerAddress, wagmiLoaded, web3Modal } from 'svelte-wagmi';
     import CappedSuperTokenControls from './CappedSuperTokenControls.svelte';
     import Dropdown from './Dropdown.svelte';
@@ -25,16 +24,9 @@
     import ZipIcon from './icons/ZipIcon.svelte';
     import { postConfig } from './post-config';
     import { remixURL } from './remix';
-    import { CompileContractProps, compileContract } from './utils/contract-utils';
     import { injectHyperlinks } from './utils/inject-hyperlinks';
-    import { signerAddress } from 'svelte-wagmi';
-    import { web3Modal } from 'svelte-wagmi';
-    import { configureWagmi } from 'svelte-wagmi';
     import { copy, copyText } from 'svelte-copy';
-    import CompileIcon from './icons/CompileIcon.svelte';
-    import DeployIcon from './icons/DeployIcon.svelte';
     import { CompileContractProps, DeployContractProps, compileContract, deployContract } from './utils/contract-utils';
-  import ProcessingIcon from './icons/ProcessingIcon.svelte';
     import { chainName } from './stores';
     import {ethers} from 'ethers';
 
