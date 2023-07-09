@@ -22,6 +22,7 @@
   "devDependencies": {
     "@openzeppelin/contracts": "4.9.2",
     "@openzeppelin/contracts-upgradeable": "4.9.2",
+    "@superfluid-finance/custom-supertokens": "superfluid-finance/custom-supertokens",
     "@types/node": "^10.17.51",
     "array.prototype.flat": "^1.2.4",
     "ava": "^5.0.0",

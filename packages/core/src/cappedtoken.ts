@@ -21,8 +21,8 @@ export interface CappedSuperTokenOptions extends CommonOptions {
 export const cappedSuperTokenDefaults: Required<CappedSuperTokenOptions> = {
   name: 'MyToken',
   symbol: 'MTK',
-  initialSupply: 19,
-  maxSupply: 100,
+  initialSupply: 69,
+  maxSupply: 42069,
   receiver: 'msg.sender',
   userData: 'userData',
   access: commonDefaults.access,
@@ -81,12 +81,12 @@ export function buildCappedSuperToken(opts: CappedSuperTokenOptions): Contract {
 
 function addBase(c: ContractBuilder, name: string, symbol: string, maxSupply: number) {
   c.addParent({
-    name: 'CappedSuperToken',
-    path: 'github.com/superfluid-finance/custom-supertokens/contracts/CappedSuperToken.sol',
+    name: 'SuperTokenBase',
+    path: 'github.com/superfluid-finance/custom-supertokens/contracts/base/SuperTokenBase.sol',
   });
 
-  c.addOverride(`_initialize(factory, "${name}", "${symbol}");`, functions.initialize);
-  c.addFunctionCode(`maxSupply = ${maxSupply};`, functions.initialize);
+  c.addFunctionCode(`_initialize(factory, "${name}", "${symbol}");`, functions.initialize);
+  c.addFunctionCode(`_maxSupply = ${maxSupply};`, functions.initialize);
 }
 
 export const premintPattern = /^(\d*)(?:\.(\d+))?(?:e(\d+))?$/;
@@ -105,7 +105,7 @@ function addPremint(c: ContractBuilder, receiver: string, initialSupply: number,
       const zeroes = new Array(Math.max(0, -decimalPlace)).fill('0').join('');
       const units = integer + decimals + zeroes;
       const exp = decimalPlace <= 0 ? '18' : `(18 - ${decimalPlace})`;
-      c.addConstructorCode(`_mint(msg.sender, ${units} * 10 ** ${exp}, ${userData ?? '""'});`);
+      c.addFunctionCode(`_mint(msg.sender, ${units} * 10 ** ${exp}, ${userData ?? '""'});`, functions.initialize);
     }
   }
 }

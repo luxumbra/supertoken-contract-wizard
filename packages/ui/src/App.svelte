@@ -161,7 +161,7 @@
     const getNetworkName = async () => {
       let provider = new ethers.providers.Web3Provider(window.ethereum);
       let network = await provider.getNetwork();
-      console.log('network', network);
+      console.log('network', network, provider);
       return network.name;
     };
 
@@ -220,7 +220,6 @@
         const deployData: DeployContractProps = {
           abi: contractAbi,
           bytecode: contractBytecode,
-          name: opts?.name,
         };
         const deployedContractData = await deployContract(deployData);
         const { contractAddress, success, error } = deployedContractData;

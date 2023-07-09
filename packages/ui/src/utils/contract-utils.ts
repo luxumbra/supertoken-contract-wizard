@@ -18,7 +18,6 @@ export interface CompileContractProps {
 export interface DeployContractProps {
   abi: Record<string, any> | string | any;
   bytecode: string;
-  name: string | undefined;
 }
 
 export interface DeployContractResponse {
@@ -50,19 +49,23 @@ export const deployContract = async (deployData: DeployContractProps) => {
       body: JSON.stringify(deployData)
     });
 
-    console.log('deploy response', response);
+    console.log('deploy response', response, signer.getAddress());
     const resData = await response.json();
 
     const gasLimit = 6000000;
     // this brings up MM but tx fails
-    const transactionRequest = { from: signer._address, data: resData.transactionData, gasLimit };
+    const transactionRequest = { from: signer.getAddress(), data: resData.transactionData, gasLimit };
     const transactionResponse = await signer.sendTransaction(transactionRequest);
 
     await transactionResponse.wait(); // Wait for transaction to be mined
+    console.log('transactionResponse', transactionResponse);
 
-    const receipt = await provider.getTransactionReceipt(transactionResponse.hash);
+    // if (transactionResponse.hash === null) {
+    //   throw new Error('Transaction failed');
+    // }
+    const receipt = await provider.getTransactionReceipt(transactionResponse.hash as string);
     const contractAddress = receipt.contractAddress;
-    console.log('contract deployed to', contractAddress);
+    // console.log('contract deployed to', contractAddress);
 
     if (contractAddress) {
       return {

@@ -21,8 +21,8 @@ export interface PureSuperTokenOptions extends CommonOptions {
 export const pureSuperTokenDefaults: Required<PureSuperTokenOptions> = {
   name: 'MyToken',
   symbol: 'MTK',
-  initialSupply: 19,
-  maxSupply: 100,
+  initialSupply: 69,
+  maxSupply: 42069,
   receiver: 'msg.sender',
   userData: 'userData',
   access: commonDefaults.access,
@@ -88,8 +88,7 @@ function addBase(c: ContractBuilder, name: string, symbol: string, receiver: str
     path: 'github.com/superfluid-finance/custom-supertokens/contracts/base/SuperTokenBase.sol',
   });
 
-  c.addFunctionCode(`_initialize(factory, name, symbol);`, functions.initialize);
-  // c.addFunctionCode(`_mint(${receiver}, ${amount}, "");`, functions.initialize);
+  c.addFunctionCode(`_initialize(factory, "${name}", "${symbol}");`, functions.initialize);
 }
 
 

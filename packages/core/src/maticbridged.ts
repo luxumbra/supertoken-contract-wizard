@@ -19,8 +19,8 @@ export interface MaticBridgedSuperTokenOptions extends CommonOptions {
 export const maticBridgedSuperTokenDefaults: Required<MaticBridgedSuperTokenOptions> = {
   name: 'MyToken',
   symbol: 'MTK',
-  initialSupply: 0,
-  receiver: '',
+  initialSupply: 69,
+  receiver: 'msg.sender',
   access: commonDefaults.access,
   upgradeable: commonDefaults.upgradeable,
   info: commonDefaults.info,
@@ -56,7 +56,7 @@ export function buildMaticBridgedSuperToken(opts: MaticBridgedSuperTokenOptions)
   setInfo(c, info);
 
   if (allOpts.mintable) {
-    addMintable(c, allOpts.receiver, allOpts.initialSupply);
+    addMintable(c);
   }
 
   if (allOpts.initialSupply > 0) {
@@ -76,14 +76,14 @@ export function buildMaticBridgedSuperToken(opts: MaticBridgedSuperTokenOptions)
 
 function addBase(c: ContractBuilder, name: string, symbol: string) {
   c.addParent({
-    name: 'MaticBridgedSuperToken',
-    path: 'github.com/superfluid-finance/custom-supertokens/contracts/MaticBridgedSuperToken.sol',
+    name: 'SuperTokenBase',
+    path: 'github.com/superfluid-finance/custom-supertokens/contracts/base/SuperTokenBase.sol',
   });
 
-  c.addConstructorCode(`_initialize(factory, "${name}", "${symbol}");`);
+  c.addFunctionCode(`_initialize(factory, "${name}", "${symbol}");`, functions.initialize);
 }
 
-function addPremint(c: ContractBuilder, receiver: string, initialSupply: number) {
+function addPremint(c: ContractBuilder, receiver: string, initialSupply: number, userData?: string) {
   const amount = initialSupply.toString();
   const m = amount.match(premintPattern);
   if (m) {
@@ -95,14 +95,14 @@ function addPremint(c: ContractBuilder, receiver: string, initialSupply: number)
       const decimalPlace = decimals.length - exponent;
       const zeroes = new Array(Math.max(0, -decimalPlace)).fill('0').join('');
       const units = integer + decimals + zeroes;
-      const exp = decimalPlace <= 0 ? 'decimals()' : `(decimals() - ${decimalPlace})`;
-      c.addConstructorCode(`_mint(msg.sender, ${units} * 10 ** ${exp});`);
+      const exp = decimalPlace <= 0 ? '18' : `(18 - ${decimalPlace})`;
+      c.addFunctionCode(`_mint(msg.sender, ${units} * 10 ** ${exp}, ${userData ?? '""'});`, functions.initialize);
     }
   }
 }
 
-function addMintable(c: ContractBuilder, receiver: string, amount: number) {
-  c.addFunctionCode(`mint(${receiver}, ${amount})`, functions.mint);
+function addMintable(c: ContractBuilder) {
+  c.addFunctionCode(`mint(receiver, amount, "");`, functions.mint);
 }
 
 function addOwnable(c: ContractBuilder) {
@@ -127,6 +127,15 @@ function addRoles(c: ContractBuilder) {
 
 //wtf
 export const functions = {
+  initialize: {
+    kind: 'external' as const,
+    name: 'initialize',
+    args: [
+      { name: 'factory', type: 'address' },
+      { name: 'name', type: 'string memory' },
+      { name: 'symbol', type: 'string memory' },
+    ]
+  },
   _mint: {
     kind: 'internal' as const,
     name: '_mint',
