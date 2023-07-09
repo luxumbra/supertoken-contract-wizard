@@ -1,45 +1,11 @@
 import type { Contract } from '@superfluid-wizard/core';
 import { ethers } from 'ethers';
-
-
-/**
- * `deployContract` deploys a contract to the currently selected blockchain (Ethereum, Polygon, etc.)
- * @param contractData The bytecode of the contract to deploy
- * @param gasLimit The gas limit for the transaction
- * @returns contractAddress
- */
-
-export const deployContract = async (contractData: string, gasLimit: number) => {
-
-  try {
-    if (typeof window === 'undefined' && typeof window.ethereum === 'undefined') {
-      throw new Error('This function can only be run in a web browser environment');
-    }
-
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-
-    // The 'data' here is the transactionData returned from your /deploy endpoint
-    const transactionRequest = { from: signer._address, data: transactionData, gasLimit: gasLimit };
-    const transactionResponse = await signer.sendTransaction(transactionRequest);
-
-    await transactionResponse.wait(); // Wait for transaction to be mined
-
-    const receipt = await provider.getTransactionReceipt(transactionResponse.hash);
-    const contractAddress = receipt.contractAddress;
-    const success = receipt.status === 1;
-
-    return { contractAddress, success };
-
-  } catch (error: any) {
-    console.error(error);
-    console.log(error.message);
-  }
-}
+import { BACKEND_URL } from './constants';
 
 export interface CompileContractResponse {
   abi: string;
   bytecode: string;
+  artifacts: Record<string, any>;
   success: boolean;
   error?: string;
 }
@@ -49,9 +15,58 @@ export interface CompileContractProps {
   contractName: string;
 }
 
+export interface DeployContractProps {
+  abi: Record<string, any> | string | any;
+  bytecode: string;
+}
+
 export interface DeployContractResponse {
   contractAddress: string;
   success: boolean;
+}
+
+/**
+ * `deployContract` deploys a contract to the currently selected blockchain (Ethereum, Polygon, etc.)
+ * @param deployData contract data to deploy
+ * @returns contractAddress
+ */
+
+export const deployContract = async (deployData: DeployContractProps) => {
+
+  try {
+    if (typeof window === 'undefined') {
+      throw new Error('This function can only be run in a web browser environment');
+    }
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+
+    const { abi, bytecode } = deployData;
+
+    const factory = new ethers.ContractFactory(abi, bytecode, signer);
+
+    const contract = await factory.deploy();
+
+    console.log('contract deployed to', contract.address);
+
+    if (contract.deployTransaction) {
+    return {
+      contractAddress: contract.address,
+      success: true
+    };
+    } else {
+      throw new Error("Contract deployment failed");
+    }
+
+  } catch (error: any) {
+    console.error(error);
+    console.log(error.message);
+    return {
+      contractAddress: '',
+      success: false,
+      error: error.message
+    };
+  }
 }
 
 /**
@@ -93,9 +108,8 @@ export const compileContract = async (compileData: CompileContractProps): Promis
 
     console.log('compileContract() replaced...', reformattedContract);
 
-    const backendUrl = 'http://localhost:3000';
     // Send the contract name and data to your /compile endpoint at the backend
-    const response = await fetch(`${backendUrl}/compile`, {
+    const response = await fetch(`${BACKEND_URL}/compile`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -104,6 +118,8 @@ export const compileContract = async (compileData: CompileContractProps): Promis
     });
 
     const resData = await response.json();
+    console.log('compileContract() resData...', resData);
+
     const { abi, bytecode, error:resError } = resData;
 
     const success = response.ok;
@@ -112,6 +128,7 @@ export const compileContract = async (compileData: CompileContractProps): Promis
       return {
         abi,
         bytecode,
+        artifacts: resData,
         success
       };
     } else {
@@ -125,6 +142,7 @@ export const compileContract = async (compileData: CompileContractProps): Promis
     return {
       abi: '',
       bytecode: '',
+      artifacts: {},
       success: false,
       error: error.message
     };

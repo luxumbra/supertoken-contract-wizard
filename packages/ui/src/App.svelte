@@ -30,12 +30,13 @@
     import { signerAddress } from 'svelte-wagmi';
     import { web3Modal } from 'svelte-wagmi';
     import { configureWagmi } from 'svelte-wagmi';
-    import { copy } from 'svelte-copy';
+    import { copy, copyText } from 'svelte-copy';
     import CompileIcon from './icons/CompileIcon.svelte';
     import DeployIcon from './icons/DeployIcon.svelte';
-    import { CompileContractProps, compileContract, deployContract } from './utils/contract-utils';
+    import { CompileContractProps, DeployContractProps, compileContract, deployContract } from './utils/contract-utils';
   import ProcessingIcon from './icons/ProcessingIcon.svelte';
-  import { error } from './error-tooltip';
+    import { chainName } from './stores';
+    import {ethers} from 'ethers';
 
     configureWagmi({
       walletconnect: true,
@@ -128,6 +129,22 @@
 
     const zipEnvModule = import('@superfluid-wizard/core/zip-env');
 
+
+    const handleCopy = async (data: Record<string, any> | string) => {
+
+      console.log('handleCopy', { data });
+      if (typeof data === 'object') {
+        data = JSON.stringify(data, null, 2);
+      }
+      const copied = await navigator.clipboard.writeText(data);
+
+      console.log('copied', copied);
+
+      // copyText(data);
+
+      alert('Copied to clipboard');
+    };
+
     const downloadHardhatHandler = async () => {
       const { zipHardhat } = await zipEnvModule;
       const zip = await zipHardhat(contract, opts);
@@ -139,10 +156,28 @@
     };
 
     let compiling = false;
+    let compiled = false;
     let deploying = false;
     let contractError: string | undefined = undefined;
+    let contractAbi: string | undefined = undefined;
+    let contractBytecode: string | undefined = undefined;
+    let contractArtifacts: Record<string, any> | string | undefined = undefined;
+
+    const getNetworkName = async () => {
+      let provider = new ethers.providers.Web3Provider(window.ethereum);
+      let network = await provider.getNetwork();
+      console.log('network', network);
+      return network.name;
+    };
+
+    const chainResponse = getNetworkName();
+    chainResponse.then((res) => {
+      console.log('chainName', res);
+      chainName.set(res);
+      return;
+    });
+
     const compileContractHandler = async (): Promise<void> => {
-      console.log('compileContractHandler()', code, opts?.name);
       if (!opts) return;
       const compileData: CompileContractProps = {
         contractData: code,
@@ -150,20 +185,60 @@
       };
 
       compiling = true;
-      const { abi, bytecode, success, error } = await compileContract(compileData);
+      const compiledData = await compileContract(compileData);
+      console.log('compileContractHandler', { compiledData });
+
+      const { abi, bytecode, artifacts, success, error } = compiledData;
+      console.log('compileContractHandler destructured', { abi, bytecode, success, error });
 
       if (success) {
         console.log('compileContractHandler success', { abi, bytecode });
+        contractAbi = abi;
+        contractBytecode = bytecode;
+        contractArtifacts = artifacts;
         compiling = false;
+        compiled = artifacts !== undefined;
+
+        setTimeout(() => {
+          compiled = false;
+        }, 2000);
       } else {
         console.log('compileContractHandler error', { error });
         compiling = false;
+        compiled = false;
         contractError = error;
       }
       return;
     };
-</script>
 
+    let deployError: string | undefined = undefined;
+    const deployContractHandler = async (): Promise<void> => {
+      try {
+        if (!contractAbi || !contractBytecode) return;
+        console.log('deployContractHandler', { contractAbi, contractBytecode });
+        deploying = true;
+        const deployData: DeployContractProps = {
+          abi: contractAbi,
+          bytecode: contractBytecode
+        };
+        const deployedContractData = await deployContract(deployData);
+
+        const { contractAddress, success, error } = deployedContractData;
+
+        console.log('deployContractHandler deployed...', { contractAddress, success, error });
+        deploying = false;
+        return;
+      } catch (error: any) {
+        console.log('deployContractHandler error', { error });
+        contractError = error.message;
+        deploying = false;
+        return;
+      }
+
+
+    }
+
+</script>
 
 <div class="container flex flex-col gap-8 p-4">
   <div class="flex items-center justify-between gap-4">
@@ -178,44 +253,45 @@
       <p>not yet loaded</p>
     </div>
     {/if}
-    {#if $chainId}
-    <div>
-      <p class="font-bold">Current chain ID</p>
-      <p>{$chainId}</p>
-    </div>
+  {#if $chainId}
+  <div>
+    <p class="font-bold">Current chain</p>
+    <p><span class="capitalize text-green-500">{$chainName}</span></p>
+  </div>
+  {:else}
+  <div>
+    <p class="font-bold">Current chain</p>
+    <p>Chain not yet available</p>
+  </div>
+  {/if}
+  {#if $signerAddress}
+  <div>
+    <p class="font-bold">Current signer address</p>
+    <p>
+      {$signerAddress}
+      <button
+      class="copy-button"
+      use:copy={$signerAddress}
+      on:svelte-copy={(event) => alert(`Copied ${$signerAddress} to clipboard`)}
+      ><CopyIcon /></button>
+      </p>
+  </div>
+  {:else}
+  <div>
+    <p class="font-bold">Current signer address</p>
+    <p>Signer address not yet available</p>
+  </div>
+  {/if}
+  {#if $web3Modal}
+  <div class="max-w-2xl">
+  <button class="primary-button" on:click={$web3Modal.openModal}>
+    {#if $connected}
+      Connected
     {:else}
-    <div>
-      <p class="font-bold">Current chain ID</p>
-      <p>Chain ID not yet available</p>
-    </div>
+      Connect Wallet
     {/if}
-    {#if $signerAddress}
-    <div>
-      <p class="font-bold">Current signer address</p>
-      <p>
-        {$signerAddress}
-        <button
-        class="copy-button"
-        use:copy={$signerAddress}
-        on:svelte-copy={(event) => alert(`Copied ${$signerAddress} to clipboard`)}
-        ><CopyIcon /></button>
-        </p>
-    </div>
-    {:else}
-    <div>
-      <p class="font-bold">Current signer address</p>
-      <p>Signer address not yet available</p>
-    </div>
-    {/if}
-    {#if $web3Modal}
-    <div class="max-w-2xl">
-    <button class="primary-button" on:click={$web3Modal.openModal}>
-      {#if $connected}
-        Connected
-      {:else}
-        Connect Wallet
-      {/if}
-    </button>
+  </button>
+
   </div>
   {:else}
     <p>Web3Modal not yet available</p>
@@ -233,16 +309,6 @@
         <button class:selected={tab === 'MaticBridged'} on:click={() => tab = 'MaticBridged'}>
           MaticBridged
         </button>
-        <!-- <button class:selected={tab === 'ERC721'} on:click={() => tab = 'ERC721'}>
-          Burnable
-        </button>
-        <button class:selected={tab === 'ERC1155'} on:click={() => tab = 'ERC1155'}>
-          Mintable
-        </button>
-        <button class:selected={tab === 'Governor'} on:click={() => tab = 'Governor'}>
-          BurnMint
-        </button>
-        -->
       </OverflowMenu>
     </div>
 
@@ -288,10 +354,11 @@
         <button
           use:trigger
           class="action-button"
-          on:click={downloadVendoredHandler}
+          on:click={() => contractArtifacts && handleCopy(contractArtifacts)}
+          disabled={!contractArtifacts}
         >
           <CopyIcon />
-          Copy Artefacts
+          Copy Artifacts
         </button>
         <div slot="content">
           Copy the artefacts for this contract.
@@ -306,13 +373,18 @@
         <button
           use:trigger
           class="action-button"
-          on:click={downloadHardhatHandler}
+          on:click={deployContractHandler}
         >
+          {#if deploying}
+            <ProcessingIcon />
+            Deploying
+          {:else}
           <DeployIcon />
-          Deploy Project
+          Deploy Contract
+          {/if}
         </button>
         <div slot="content">
-          Deploy this contract.
+          Deploy this contract on <i class="text-green-400 capitalize">{$chainName}</i> network.
         </div>
       </Tooltip>
       <Tooltip
@@ -381,6 +453,9 @@
   {#if contractError}
   <pre class="text-red-500 text-sm"><code>{contractError}</code></pre>
   {/if}
+  {#if compiled}
+    <p class="text-green-500">{`${opts?.name} successfully compiled.`}</p>
+  {/if}
 
   <div class="flex flex-row gap-4 grow">
     <div class="controls w-64 flex flex-col shrink-0 justify-between">
@@ -393,21 +468,6 @@
       <div class:hidden={tab !== 'MaticBridged'}>
         <MaticBridgedSuperTokenControls bind:opts={allOpts.MaticBridged} />
       </div>
-      <!-- <div class:hidden={tab !== 'ERC20'}>
-        <ERC20Controls bind:opts={allOpts.ERC20} />
-      </div>
-      <div class:hidden={tab !== 'ERC721'}>
-        <ERC721Controls bind:opts={allOpts.ERC721} />
-      </div>
-      <div class:hidden={tab !== 'ERC1155'}>
-        <ERC1155Controls bind:opts={allOpts.ERC1155} />
-      </div>
-      <div class:hidden={tab !== 'Governor'}>
-        <GovernorControls bind:opts={allOpts.Governor} errors={errors.Governor} />
-      </div>
-      <div class:hidden={tab !== 'Custom'}>
-        <CustomControls bind:opts={allOpts.Custom} />
-      </div> -->
     </div>
 
     <div class="output flex flex-col grow overflow-auto">
