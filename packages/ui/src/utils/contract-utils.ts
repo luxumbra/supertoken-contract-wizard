@@ -18,6 +18,7 @@ export interface CompileContractProps {
 export interface DeployContractProps {
   abi: Record<string, any> | string | any;
   bytecode: string;
+  name: string | undefined;
 }
 
 export interface DeployContractResponse {
@@ -41,7 +42,7 @@ export const deployContract = async (deployData: DeployContractProps) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
 
-    const { abi, bytecode } = deployData;
+    const { abi, bytecode, name } = deployData;
 
     const factory = new ethers.ContractFactory(abi, bytecode, signer);
 
@@ -50,10 +51,24 @@ export const deployContract = async (deployData: DeployContractProps) => {
     console.log('contract deployed to', contract.address);
 
     if (contract.deployTransaction) {
-    return {
-      contractAddress: contract.address,
-      success: true
-    };
+      const response = await fetch(`${BACKEND_URL}/delete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete contract');
+      } else {
+        console.log('contract deleted from backend');
+      }
+
+      return {
+        contractAddress: contract.address,
+        success: true
+      };
     } else {
       throw new Error("Contract deployment failed");
     }
