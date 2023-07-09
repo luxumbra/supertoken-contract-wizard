@@ -42,36 +42,37 @@ export const deployContract = async (deployData: DeployContractProps) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
 
-    const { abi, bytecode, name } = deployData;
+    const response = await fetch(`${BACKEND_URL}/deploy`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(deployData)
+    });
 
-    const factory = new ethers.ContractFactory(abi, bytecode, signer);
+    console.log('deploy response', response);
+    const resData = await response.json();
 
-    const contract = await factory.deploy();
+    const gasLimit = 6000000;
+    // this brings up MM but tx fails
+    const transactionRequest = { from: signer._address, data: resData.transactionData, gasLimit };
+    const transactionResponse = await signer.sendTransaction(transactionRequest);
 
-    console.log('contract deployed to', contract.address);
+    await transactionResponse.wait(); // Wait for transaction to be mined
 
-    if (contract.deployTransaction) {
-      const response = await fetch(`${BACKEND_URL}/delete`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ name })
-      });
+    const receipt = await provider.getTransactionReceipt(transactionResponse.hash);
+    const contractAddress = receipt.contractAddress;
+    console.log('contract deployed to', contractAddress);
 
-      if (!response.ok) {
-        throw new Error('Failed to delete contract');
-      } else {
-        console.log('contract deleted from backend');
-      }
-
+    if (contractAddress) {
       return {
-        contractAddress: contract.address,
+        contractAddress,
         success: true
       };
     } else {
-      throw new Error("Contract deployment failed");
+      throw new Error('Deployment failed');
     }
+
 
   } catch (error: any) {
     console.error(error);

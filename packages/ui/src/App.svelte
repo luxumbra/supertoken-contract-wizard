@@ -29,6 +29,7 @@
     import { CompileContractProps, DeployContractProps, compileContract, deployContract } from './utils/contract-utils';
     import { chainName } from './stores';
     import {ethers} from 'ethers';
+  import { BACKEND_URL } from './utils/constants';
 
     configureWagmi({
       walletconnect: true,
@@ -155,6 +156,7 @@
     let contractAbi: string | undefined = undefined;
     let contractBytecode: string | undefined = undefined;
     let contractArtifacts: Record<string, any> | string | undefined = undefined;
+    let deployedContractAddress: string | undefined = undefined;
 
     const getNetworkName = async () => {
       let provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -213,7 +215,7 @@
     const deployContractHandler = async (): Promise<void> => {
       try {
         if (!contractAbi || !contractBytecode) return;
-        console.log('deployContractHandler', { contractAbi, contractBytecode });
+        // console.log('deployContractHandler', { contractAbi, contractBytecode });
         deploying = true;
         const deployData: DeployContractProps = {
           abi: contractAbi,
@@ -221,11 +223,17 @@
           name: opts?.name,
         };
         const deployedContractData = await deployContract(deployData);
-
         const { contractAddress, success, error } = deployedContractData;
 
+        if (success) {
+        deployedContractAddress = contractAddress;
         console.log('deployContractHandler deployed...', { contractAddress, success, error });
+        } else {
+          console.log('deployContractHandler error', { error });
+          deployError = error;
+        }
         deploying = false;
+
         return;
       } catch (error: any) {
         console.log('deployContractHandler error', { error });
@@ -239,6 +247,7 @@
 
 <div class="container flex flex-col gap-8 p-4">
   <div class="flex items-center justify-between gap-4">
+    <p>backend: {BACKEND_URL}</p>
     {#if $wagmiLoaded}
     <div>
       <p class="font-bold">@wagmi/core status</p>
@@ -458,7 +467,9 @@
   {#if compiled}
     <p class="text-green-500 text-sm text-center">{`${opts?.name} successfully compiled.`}</p>
   {/if}
-
+  {#if deployedContractAddress !== undefined}
+    <p class="text-green-500 text-sm text-center">{`${opts?.name} successfully deployed at ${deployedContractAddress}.`}</p>
+  {/if}
   <div class="flex flex-row gap-4 grow">
     <div class="controls w-64 flex flex-col shrink-0 justify-between">
       <div class:hidden={tab !== 'PURE'}>

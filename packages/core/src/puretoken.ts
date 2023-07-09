@@ -55,7 +55,7 @@ export function buildPureSuperToken(opts: PureSuperTokenOptions): Contract {
 
   const { access, info } = allOpts;
 
-  addBase(c, allOpts.name, allOpts.symbol);
+  addBase(c, allOpts.name, allOpts.symbol, allOpts.receiver, allOpts.initialSupply, allOpts.userData);
 
   if (allOpts.initialSupply > 0) {
     addPremint(c, allOpts.receiver, allOpts.initialSupply);
@@ -82,13 +82,14 @@ export function buildPureSuperToken(opts: PureSuperTokenOptions): Contract {
   return c;
 }
 
-function addBase(c: ContractBuilder, name: string, symbol: string) {
+function addBase(c: ContractBuilder, name: string, symbol: string, receiver: string, amount: number, userData?: string) {
   c.addParent({
-    name: 'PureSuperToken',
-    path: 'github.com/superfluid-finance/custom-supertokens/contracts/PureSuperToken.sol',
+    name: 'SuperTokenBase',
+    path: 'github.com/superfluid-finance/custom-supertokens/contracts/base/SuperTokenBase.sol',
   });
 
-  c.addOverride(`_initialize(factory, "${name}", "${symbol}");`, functions.initialize);
+  c.addFunctionCode(`_initialize(factory, name, symbol);`, functions.initialize);
+  // c.addFunctionCode(`_mint(${receiver}, ${amount}, "");`, functions.initialize);
 }
 
 
@@ -106,7 +107,7 @@ function addPremint(c: ContractBuilder, receiver: string, initialSupply: number,
       const zeroes = new Array(Math.max(0, -decimalPlace)).fill('0').join('');
       const units = integer + decimals + zeroes;
       const exp = decimalPlace <= 0 ? '18' : `(18 - ${decimalPlace})`;
-      c.addConstructorCode(`_mint(${receiver}, ${units} * 10 ** ${exp}, ${userData ?? '""'});`);
+      c.addFunctionCode(`_mint(${receiver}, ${units} * 10 ** ${exp}, ${userData ?? '""'});`, functions.initialize);
     }
   }
 }
@@ -153,8 +154,6 @@ export const functions = {
       { name: 'factory', type: 'address' },
       { name: 'name', type: 'string memory' },
       { name: 'symbol', type: 'string memory' },
-      { name: 'receiver', type: 'address' },
-      { name: 'initialSupply', type: 'uint256' },
     ]
   },
   _mint: {
