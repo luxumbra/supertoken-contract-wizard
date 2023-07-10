@@ -55,7 +55,7 @@ input[type="number"] {
     margin-top: var(--size-3);
   }
 
-  h1 {
+  h2 {
     margin-top: 0;
     margin-bottom: 0;
     text-transform: lowercase;
@@ -137,3 +137,4 @@ input.input-inline {
 .import-link {
   color: inherit;
 }
+

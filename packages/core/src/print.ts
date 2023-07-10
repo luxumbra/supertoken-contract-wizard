@@ -20,7 +20,7 @@ export function printContract(contract: Contract, opts?: Options): string {
   return formatLines(
     ...spaceBetween(
       [
-        `// SPDX-License-Identifier: ${contract.license}`,
+        `/* SPDX-License-Identifier: ${contract.license} */`,
         `pragma solidity ^${SOLIDITY_VERSION};`,
       ],
 
@@ -97,7 +97,7 @@ function printConstructor(contract: Contract, helpers: Helpers): Lines[] {
   }
 }
 
-const DISABLE_INITIALIZERS = 
+const DISABLE_INITIALIZERS =
 [
   '/// @custom:oz-upgrades-unsafe-allow constructor',
   'constructor() {',

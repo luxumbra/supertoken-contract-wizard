@@ -1,6 +1,6 @@
 # OpenZeppelin Contracts Wizard for Solidity
 
-[![NPM Package](https://img.shields.io/npm/v/@openzeppelin/wizard?color=%234e5de4)](https://www.npmjs.com/package/@openzeppelin/wizard)
+[![NPM Package](https://img.shields.io/npm/v/@superfluid-wizard/core?color=%234e5de4)](https://www.npmjs.com/package/@superfluid-wizard/core)
 
 Interactively build a contract out of components from OpenZeppelin Contracts. Provide parameters and desired features for the kind of contract that you want, and the Wizard will generate all of the code necessary. The resulting code is ready to be compiled and deployed, or it can serve as a starting point and customized further with application specific logic.
 
@@ -8,7 +8,7 @@ This package provides a programmatic API. For a web interface, see https://wizar
 
 ### Installation
 
-`npm install @openzeppelin/wizard`
+`npm install @superfluid-wizard/core`
 
 ### Contract types
 
@@ -75,14 +75,14 @@ function isAccessControlRequired(opts: Partial<GovernorOptions>): boolean
 ```js
 function isAccessControlRequired(opts: Partial<CustomOptions>): boolean
 ```
-Whether any of the provided options require access control to be enabled. If this returns `true`, then calling `print` with the same options would cause the `access` option to default to `'ownable'` if it was `undefined` or `false`. 
+Whether any of the provided options require access control to be enabled. If this returns `true`, then calling `print` with the same options would cause the `access` option to default to `'ownable'` if it was `undefined` or `false`.
 
 ### Examples
 
-Import the contract type(s) that you want to use from the `@openzeppelin/wizard` package:
+Import the contract type(s) that you want to use from the `@superfluid-wizard/core` package:
 
 ```js
-import { erc20 } from '@openzeppelin/wizard';
+import { erc20 } from '@superfluid-wizard/core';
 ```
 
 To generate the source code for an ERC20 contract with all of the default settings:

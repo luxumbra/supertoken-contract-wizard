@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { Info } from '@openzeppelin/wizard';
-  import { infoDefaults } from '@openzeppelin/wizard';
+  import type { Info } from '@superfluid-wizard/core';
+  import { infoDefaults } from '@superfluid-wizard/core';
 
   import HelpTooltip from './HelpTooltip.svelte';
 
@@ -8,12 +8,12 @@
 </script>
 
 <section class="controls-section">
-  <h1>
+  <h2>
     <!-- svelte-ignore a11y-label-has-associated-control -->
     <label class="flex items-center tooltip-container pr-2">
       <span>Info</span>
     </label>
-  </h1>
+  </h2>
 
   <label class="labeled-input">
     <span class="flex justify-between pr-2">

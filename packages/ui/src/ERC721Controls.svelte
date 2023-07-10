@@ -1,13 +1,13 @@
 <script lang="ts">
   import HelpTooltip from './HelpTooltip.svelte';
 
-  import type { KindedOptions } from '@openzeppelin/wizard';
-  import { erc721, infoDefaults } from '@openzeppelin/wizard';
-  
+  import type { KindedOptions } from '@superfluid-wizard/core';
+  import { erc721, infoDefaults } from '@superfluid-wizard/core';
+
   import AccessControlSection from './AccessControlSection.svelte';
   import UpgradeabilitySection from './UpgradeabilitySection.svelte';
   import InfoSection from './InfoSection.svelte';
-  
+
   export const opts: Required<KindedOptions['ERC721']> = {
     kind: 'ERC721',
     ...erc721.defaults,

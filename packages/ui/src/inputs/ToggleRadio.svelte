@@ -3,6 +3,7 @@
 
   export let value: false | T = false;
   export let checked = value !== false;
+  export let name: string;
   export let defaultValue: T;
   export let disabled: boolean | undefined = undefined;
 
@@ -27,4 +28,4 @@
   }
 </script>
 
-<input type="checkbox" bind:checked {disabled}>
+<input id={name} type="checkbox" bind:checked {disabled}>

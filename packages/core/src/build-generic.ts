@@ -5,6 +5,7 @@ import { ERC721Options, buildERC721 } from './erc721';
 import { GovernorOptions, buildGovernor } from './governor';
 import { buildPureSuperToken, type PureSuperTokenOptions } from './puretoken';
 import { buildCappedSuperToken, type CappedSuperTokenOptions } from './cappedtoken';
+import { buildMaticBridgedSuperToken, type MaticBridgedSuperTokenOptions } from './maticbridged';
 
 export interface KindedOptions {
 	PURE: { kind: 'PURE' } & PureSuperTokenOptions;
@@ -13,6 +14,7 @@ export interface KindedOptions {
 	ERC1155: { kind: 'ERC1155' } & ERC1155Options;
 	Governor: { kind: 'Governor' } & GovernorOptions;
 	Capped: { kind: 'Capped' } & CappedSuperTokenOptions;
+	MaticBridged: { kind: 'MaticBridged' } & MaticBridgedSuperTokenOptions;
 	Custom: { kind: 'Custom' } & CustomOptions;
 }
 
@@ -37,6 +39,9 @@ export function buildGeneric(opts: GenericOptions) {
 
 		case 'Capped':
 			return buildCappedSuperToken(opts);
+
+		case 'MaticBridged':
+			return buildMaticBridgedSuperToken(opts)
 
 		case 'Custom':
 			return buildCustom(opts);
