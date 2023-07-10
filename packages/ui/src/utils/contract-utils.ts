@@ -52,7 +52,7 @@ export const deployContract = async (deployData: DeployContractProps) => {
     // console.log('deploy response', {response, resData});
     // debugger;
     // const address = await signer.getAddress();
-    const gasLimit = 6000000;
+    const gasLimit = 3000000;
     // this brings up MM but tx fails
     const transactionRequest = { data: resData.transactionData, gasLimit };
     const transactionResponse = await signer.sendTransaction(transactionRequest);
