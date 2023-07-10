@@ -46,28 +46,28 @@ export const deployContract = async (deployData: DeployContractProps) => {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(deployData)
+      body: JSON.stringify({ "abi": deployData.abi, "bytecode": deployData.bytecode })
     });
 
-    console.log('deploy response', response.body, signer);
     const resData = await response.json();
-
+    const address = await signer.getAddress();
     const gasLimit = 6000000;
     // this brings up MM but tx fails
-    const transactionRequest = { from: signer.getAddress(), data: resData.transactionData, gasLimit };
+    const transactionRequest = { from: address, data: resData.transactionData, gasLimit };
     const transactionResponse = await signer.sendTransaction(transactionRequest);
 
-    await transactionResponse.wait(); // Wait for transaction to be mined
+    const tx = await transactionResponse.wait(); // Wait for transaction to be mined
     console.log('transactionResponse', transactionResponse);
 
     // if (transactionResponse.hash === null) {
     //   throw new Error('Transaction failed');
     // }
-    const receipt = await provider.getTransactionReceipt(transactionResponse.hash as string);
-    const contractAddress = receipt.contractAddress;
-    // console.log('contract deployed to', contractAddress);
+    if (tx.transactionHash === null) {
+      const receipt = await provider.getTransactionReceipt(tx.transactionHash);
+      const contractAddress = receipt.contractAddress;
+      // console.log('contract deployed to', contractAddress);
 
-    if (contractAddress) {
+
       return {
         contractAddress,
         success: true
@@ -78,8 +78,7 @@ export const deployContract = async (deployData: DeployContractProps) => {
 
 
   } catch (error: any) {
-    console.error(error);
-    console.log(error.message);
+    console.log('deployContract', error.message);
     return {
       contractAddress: '',
       success: false,
@@ -98,12 +97,12 @@ export function adjustSolidityCode(code: string) {
   code = code.replace(/^pragma solidity [^;]+;/m, 'pragma solidity ^0.8.0;');
 
   // Change the import format and replace github.com/ with @
-  code = code.replace(/import "([^"]+)\/([^/]+)\.sol";/g, function(_, path, contractName) {
-      // Replace 'github.com/' with '@' in the path
-      path = path.replace('github.com/', '@');
+  code = code.replace(/import "([^"]+)\/([^/]+)\.sol";/g, function (_, path, contractName) {
+    // Replace 'github.com/' with '@' in the path
+    path = path.replace('github.com/', '@');
 
-      // Change the import to the requested format
-      return `import { ${contractName} } from "${path}/${contractName}.sol";`;
+    // Change the import to the requested format
+    return `import { ${contractName} } from "${path}/${contractName}.sol";`;
   });
 
   return code;
@@ -134,7 +133,7 @@ export const compileContract = async (compileData: CompileContractProps): Promis
     const resData = await response.json();
     console.log('compileContract() resData...', resData);
 
-    const { abi, bytecode, error:resError } = resData;
+    const { abi, bytecode, error: resError } = resData;
 
     const success = response.ok;
 

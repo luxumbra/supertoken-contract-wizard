@@ -228,8 +228,8 @@
         deployedContractAddress = contractAddress;
         console.log('deployContractHandler deployed...', { contractAddress, success, error });
         } else {
-          console.log('deployContractHandler error', { error });
-          deployError = error;
+          throw new Error("Error deploying contract");
+
         }
         deploying = false;
 
@@ -237,6 +237,7 @@
       } catch (error: any) {
         console.log('deployContractHandler error', { error });
         contractError = error.message;
+
         deploying = false;
         return;
       }
