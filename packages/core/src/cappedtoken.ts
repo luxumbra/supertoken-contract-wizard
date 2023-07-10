@@ -111,6 +111,10 @@ function addPremint(c: ContractBuilder, receiver: string, initialSupply: number,
 }
 
 function addOwnable(c: ContractBuilder) {
+  c.addParent({
+    name: 'Ownable',
+    path: '@openzeppelin/contracts/access/Ownable.sol',
+  });
   c.addModifier(`onlyOwner`, functions.mint);
 }
 

@@ -1,4 +1,4 @@
-const BACKEND_URL = 'https://hunters-workshop.xyz';
+const BACKEND_URL = 'http://localhost:3000';
 
 export {
   BACKEND_URL
