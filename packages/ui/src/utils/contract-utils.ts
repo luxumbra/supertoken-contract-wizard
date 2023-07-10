@@ -2,6 +2,11 @@ import type { Contract } from '@superfluid-wizard/core';
 import { ethers } from 'ethers';
 import { BACKEND_URL } from './constants';
 
+export const initializeData = {
+  contractAddress: '',
+  initializeABI: '',
+}
+
 export interface CompileContractResponse {
   abi: string;
   bytecode: string;
@@ -63,11 +68,12 @@ export const deployContract = async (deployData: DeployContractProps) => {
     // if (transactionResponse.hash === null) {
     //   throw new Error('Transaction failed');
     // }
-    if (tx.transactionHash === null) {
+    console.log(initializeData, 'test 1')
+    if (tx.transactionHash !== null) {
       const receipt = await provider.getTransactionReceipt(tx.transactionHash);
       const contractAddress = receipt.contractAddress;
       // console.log('contract deployed to', contractAddress);
-
+      initializeData.contractAddress = contractAddress;
 
       return {
         contractAddress,
@@ -139,6 +145,7 @@ export const compileContract = async (compileData: CompileContractProps): Promis
     const success = response.ok;
 
     if (success) {
+      initializeData.initializeABI = abi;
       return {
         abi,
         bytecode,
@@ -158,5 +165,19 @@ export const compileContract = async (compileData: CompileContractProps): Promis
       success: false,
       error: error.message
     };
+  }
+}
+
+export const initializeContract = async (opts: any) => {
+  if (!initializeData.contractAddress || !initializeData.initializeABI) return;
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = provider.getSigner();
+  const supertoken = new ethers.Contract(initializeData.contractAddress, initializeData.initializeABI, signer);
+  console.log(supertoken, 'supertoken')
+  try {
+    const tx = await supertoken.initialize(initializeData.contractAddress, opts.name, opts.symbol);
+    return tx;
+  } catch (error: any) {
+    console.log('initializeContract', error.message);
   }
 }
