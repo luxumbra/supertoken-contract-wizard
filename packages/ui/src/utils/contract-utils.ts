@@ -46,10 +46,11 @@ export const deployContract = async (deployData: DeployContractProps) => {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ "abi": deployData.abi, "bytecode": deployData.bytecode })
+      body: JSON.stringify(deployData)
     });
-
     const resData = await response.json();
+    // console.log('deploy response', {response, resData});
+    // debugger;
     const address = await signer.getAddress();
     const gasLimit = 6000000;
     // this brings up MM but tx fails
