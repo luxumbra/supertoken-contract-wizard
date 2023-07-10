@@ -214,13 +214,11 @@
     const deployContractHandler = async (): Promise<void> => {
       try {
         if (!contractAbi || !contractBytecode) return;
-        // console.log('deployContractHandler', { contractAbi, contractBytecode });
         deploying = true;
         const deployData: DeployContractProps = {
           abi: contractAbi,
           bytecode: contractBytecode,
         };
-
         const deployedContractData = await deployContract(deployData);
         const { contractAddress, success, error } = deployedContractData;
 
@@ -247,7 +245,7 @@
 
 <div class="container flex flex-col gap-8 p-4">
   <div class="flex items-center justify-between gap-4">
-    <p>{BACKEND_URL}</p>
+    <!-- <p>{BACKEND_URL}</p> -->
     {#if $wagmiLoaded}
     <div>
       <p class="font-bold">@wagmi/core status</p>
