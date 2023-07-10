@@ -26,10 +26,9 @@
     import { remixURL } from './remix';
     import { injectHyperlinks } from './utils/inject-hyperlinks';
     import { copy, copyText } from 'svelte-copy';
-    import { CompileContractProps, DeployContractProps, compileContract, deployContract } from './utils/contract-utils';
+    import { CompileContractProps, DeployContractProps, compileContract, deployContract, initializeContract, mintTokens } from './utils/contract-utils';
     import { chainName } from './stores';
     import {ethers} from 'ethers';
-  import { BACKEND_URL } from './utils/constants';
 
     configureWagmi({
       walletconnect: true,
@@ -148,6 +147,7 @@
       }
     };
 
+    let initializing = false;
     let compiling = false;
     let compiled = false;
     let deploying = false;
@@ -183,10 +183,8 @@
       const compiledData = await compileContract(compileData);
 
       const { abi, bytecode, artifacts, success, error } = compiledData;
-      // console.log('compileContractHandler destructured', { abi, bytecode, success, error });
 
       if (success) {
-        // console.log('compileContractHandler success', { abi, bytecode });
         contractAbi = abi;
         contractBytecode = bytecode;
         contractArtifacts = artifacts;
@@ -240,6 +238,23 @@
         return;
       }
     }
+
+    const initContractHandler = async (): Promise<void> => {
+      if (!opts) return;
+      try {
+        initializing = true;
+        const initialized = await initializeContract(opts);
+        initializing = false;
+        return initialized;
+      } catch (error: any) {
+        console.log('initContractHandler error', { error });
+        contractError = error.message;
+        initializing = false;
+        return;
+      }
+
+    }
+
 
 </script>
 
@@ -393,6 +408,34 @@
           Deploy this contract on <i class="text-green-400 capitalize">{$chainName}</i> network.
           {:else}
           Please compile your contract before you deploy it.
+          {/if}
+        </div>
+      </Tooltip>
+      <Tooltip
+        let:trigger
+        theme="border"
+        hideOnClick={false}
+        interactive
+        >
+        <button
+          use:trigger
+          class="action-button"
+          on:click={initContractHandler}
+          disabled={deployedContractAddress === undefined}
+        >
+          {#if initializing}
+            <ProcessingIcon />
+            Initializing
+          {:else}
+          <DeployIcon />
+          Initialize Contract
+          {/if}
+        </button>
+        <div slot="content">
+          {#if deployedContractAddress}
+          initialize this contract on <i class="text-green-400 capitalize">{$chainName}</i> network.
+          {:else}
+          Please compile and deploy your contract before you deploy it.
           {/if}
         </div>
       </Tooltip>
