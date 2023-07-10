@@ -32,11 +32,11 @@ export interface DeployContractResponse {
  */
 
 export const deployContract = async (deployData: DeployContractProps) => {
-
   try {
     if (typeof window === 'undefined') {
       throw new Error('This function can only be run in a web browser environment');
     }
+    console.log('Data about to be deployed', deployData);
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
@@ -49,7 +49,7 @@ export const deployContract = async (deployData: DeployContractProps) => {
       body: JSON.stringify(deployData)
     });
 
-    console.log('deploy response', response, signer.getAddress());
+    console.log('deploy response', response.body, signer);
     const resData = await response.json();
 
     const gasLimit = 6000000;
@@ -106,9 +106,6 @@ export function adjustSolidityCode(code: string) {
       return `import { ${contractName} } from "${path}/${contractName}.sol";`;
   });
 
-  // Replace all linebreaks with \n and " with '
-  // code = code.replace(/\r?\n/g, '\\n').replace(/"/g, "'");
-
   return code;
 }
 
@@ -125,15 +122,13 @@ export const compileContract = async (compileData: CompileContractProps): Promis
   try {
     const reformattedContract = adjustSolidityCode(contractData)
 
-    console.log('compileContract() replaced...', reformattedContract);
-
     // Send the contract name and data to your /compile endpoint at the backend
     const response = await fetch(`${BACKEND_URL}/compile`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ name: contractName, code: reformattedContract })
+      body: JSON.stringify({ name: contractName, code: reformattedContract.trim() })
     });
 
     const resData = await response.json();
@@ -153,8 +148,6 @@ export const compileContract = async (compileData: CompileContractProps): Promis
     } else {
       throw new Error(resError);
     }
-
-
 
   } catch (error: any) {
     console.error('Compile error: ', error);

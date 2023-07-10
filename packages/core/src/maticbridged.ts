@@ -80,7 +80,7 @@ function addBase(c: ContractBuilder, name: string, symbol: string) {
     path: 'github.com/superfluid-finance/custom-supertokens/contracts/base/SuperTokenBase.sol',
   });
 
-  c.addFunctionCode(`_initialize(factory, "${name}", "${symbol}");`, functions.initialize);
+  c.addFunctionCode(`_initialize(factory, name, symbol);`, functions.initialize);
 }
 
 function addPremint(c: ContractBuilder, receiver: string, initialSupply: number, userData?: string) {

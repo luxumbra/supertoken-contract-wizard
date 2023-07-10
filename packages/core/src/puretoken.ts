@@ -55,7 +55,7 @@ export function buildPureSuperToken(opts: PureSuperTokenOptions): Contract {
 
   const { access, info } = allOpts;
 
-  addBase(c, allOpts.name, allOpts.symbol, allOpts.receiver, allOpts.initialSupply, allOpts.userData);
+  addBase(c, allOpts.name, allOpts.symbol);
 
   if (allOpts.initialSupply > 0) {
     addPremint(c, allOpts.receiver, allOpts.initialSupply);
@@ -82,13 +82,13 @@ export function buildPureSuperToken(opts: PureSuperTokenOptions): Contract {
   return c;
 }
 
-function addBase(c: ContractBuilder, name: string, symbol: string, receiver: string, amount: number, userData?: string) {
+function addBase(c: ContractBuilder, name: string, symbol: string) {
   c.addParent({
     name: 'SuperTokenBase',
     path: 'github.com/superfluid-finance/custom-supertokens/contracts/base/SuperTokenBase.sol',
   });
 
-  c.addFunctionCode(`_initialize(factory, "${name}", "${symbol}");`, functions.initialize);
+  c.addFunctionCode(`_initialize(factory, name, symbol);`, functions.initialize);
 }
 
 

@@ -181,7 +181,6 @@
 
       compiling = true;
       const compiledData = await compileContract(compileData);
-      console.log('compileContractHandler', { compiledData });
 
       const { abi, bytecode, artifacts, success, error } = compiledData;
       // console.log('compileContractHandler destructured', { abi, bytecode, success, error });
@@ -221,6 +220,7 @@
           abi: contractAbi,
           bytecode: contractBytecode,
         };
+
         const deployedContractData = await deployContract(deployData);
         const { contractAddress, success, error } = deployedContractData;
 
@@ -246,7 +246,7 @@
 
 <div class="container flex flex-col gap-8 p-4">
   <div class="flex items-center justify-between gap-4">
-    <!-- <p>backend: {BACKEND_URL}</p> -->
+    <p>{BACKEND_URL}</p>
     {#if $wagmiLoaded}
     <div>
       <p class="font-bold">@wagmi/core status</p>
