@@ -1,4 +1,4 @@
-const BACKEND_URL = 'http://hunters-workshop.xyz:3000';
+const BACKEND_URL = 'https://hunters-workshop.xyz';
 
 export {
   BACKEND_URL
