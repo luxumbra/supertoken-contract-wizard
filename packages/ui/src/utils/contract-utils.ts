@@ -51,10 +51,10 @@ export const deployContract = async (deployData: DeployContractProps) => {
     const resData = await response.json();
     // console.log('deploy response', {response, resData});
     // debugger;
-    const address = await signer.getAddress();
+    // const address = await signer.getAddress();
     const gasLimit = 6000000;
     // this brings up MM but tx fails
-    const transactionRequest = { from: address, data: resData.transactionData, gasLimit };
+    const transactionRequest = { data: resData.transactionData, gasLimit };
     const transactionResponse = await signer.sendTransaction(transactionRequest);
 
     const tx = await transactionResponse.wait(); // Wait for transaction to be mined
