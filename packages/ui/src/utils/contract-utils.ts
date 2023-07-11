@@ -175,7 +175,8 @@ export const initializeContract = async (opts: any) => {
   const supertoken = new ethers.Contract(initializeData.contractAddress, initializeData.initializeABI, signer);
   console.log(supertoken, 'supertoken')
   try {
-    const tx = await supertoken.initialize(initializeData.contractAddress, opts.name, opts.symbol);
+    //TO DO: DYNAMICALLY FETCH THE supertokenfactory ADDRESS FOR CHAIN WHICH YOU ARE DEPLOYING ON AND PASS IT IN THE FIRST PARAMETER
+    const tx = await supertoken.initialize('0x2C90719f25B10Fc5646c82DA3240C76Fa5BcCF34', opts.name, opts.symbol);
     return tx;
   } catch (error: any) {
     console.log('initializeContract', error.message);
