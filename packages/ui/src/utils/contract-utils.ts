@@ -27,7 +27,9 @@ export interface DeployContractProps {
 
 export interface DeployContractResponse {
   contractAddress: string;
+  txHash?: string;
   success: boolean;
+  error?: string;
 }
 
 /**
@@ -69,14 +71,15 @@ export const deployContract = async (deployData: DeployContractProps) => {
     //   throw new Error('Transaction failed');
     // }
     console.log(initializeData, 'test 1')
-    if (tx.transactionHash !== null) {
+    if (tx.transactionHash !== undefined) {
       const receipt = await provider.getTransactionReceipt(tx.transactionHash);
-      const contractAddress = receipt.contractAddress;
+      const contractAddress = receipt.contractAddress as string;
       // console.log('contract deployed to', contractAddress);
       initializeData.contractAddress = contractAddress;
 
       return {
         contractAddress,
+        txHash: tx.transactionHash,
         success: true
       };
     } else {
