@@ -43,7 +43,7 @@
   import { postConfig } from "./post-config";
   import { remixURL } from "./remix";
   import { injectHyperlinks } from "./utils/inject-hyperlinks";
-  import { copy, copyText } from "svelte-copy";
+  import { copy } from "svelte-copy";
   import {
     CompileContractProps,
     DeployContractProps,
@@ -54,17 +54,26 @@
   import { chainName } from "./stores";
   import { ethers } from "ethers";
   import { clsx } from "clsx";
-  import { SvelteToast, toast } from "@zerodevx/svelte-toast";
-  // Optionally set default options here
-  const toastOptions = {
-    theme: {
-      "--toastBackground": "#000",
-      "--toastProgressBackground": "#444",
-      "--toastProgressFill": "#888",
-      "--toastColor": "#fff",
-    },
-  };
+  import { SvelteToast } from "@zerodevx/svelte-toast";
+  import {
+    successToast,
+    infoToast,
+    failureToast,
+    warningToast,
+    toastOptions,
+  } from "./components/toasts";
+  import {
+    BACKEND_URL,
+    NetworkId,
+    getNetworkData,
+    FACTORY_CONTRACT_MAP,
+    NETWORK_CONTRACTS_MAP,
+    NETWORK_MAP,
+    changeNetwork,
+    shortenAddress,
+  } from "./utils";
 
+  const currentChainId = chainId as unknown as NetworkId;
   configureWagmi({
     walletconnect: true,
     walletconnectProjectID: "68fcbeed1aee822daef920257ba3f2de",
@@ -86,6 +95,7 @@
   let errors: { [k in Kind]?: OptionsErrorMessages } = {};
 
   let contract: Contract = new ContractBuilder("MyToken");
+  const networkData = getNetworkData(currentChainId);
 
   $: opts = allOpts[tab];
 
@@ -111,12 +121,15 @@
 
   let copied = false;
   const copyHandler = async () => {
-    console.log('opts upgadeable:', opts?.upgradeable);
+    console.log("opts upgadeable:", opts?.upgradeable);
+    console.log("networkData", { networkData, chainId, FACTORY_CONTRACT_MAP, NETWORK_MAP, NETWORK_CONTRACTS_MAP});
     await navigator.clipboard.writeText(code);
     copied = true;
     if (opts) {
       await postConfig(opts, "copy", language);
     }
+
+    infoToast("Copied to clipboard!");
     setTimeout(() => {
       copied = false;
     }, 1000);
@@ -169,7 +182,7 @@
     }
     await navigator.clipboard.writeText(data);
 
-    toast.push("Copied to clipboard!");
+    infoToast("Copied to clipboard!");
   };
 
   const downloadHardhatHandler = async () => {
@@ -194,19 +207,20 @@
   let deployedContractAddress: string | undefined = undefined;
   let deployError: string | undefined = undefined;
 
-  const getNetworkName = async () => {
-    let provider = new ethers.providers.Web3Provider(window.ethereum);
-    let network = await provider.getNetwork();
-    console.log("network", network, provider);
-    return network.name;
-  };
+  // const getNetworkName = async () => {
+  //   let provider = new ethers.providers.Web3Provider(window.ethereum);
+  //   let network = await provider.getNetwork();
+  //   console.log("network", network, provider);
 
-  const chainResponse = getNetworkName();
-  chainResponse.then((res) => {
-    console.log("chainName", res);
-    chainName.set(res);
-    return;
-  });
+  //   return network.name;
+  // };
+
+  // const chainResponse = getNetworkName();
+  // chainResponse.then((res) => {
+  //   console.log("chainName", res);
+  //   chainName.set(res);
+  //   return;
+  // });
 
   const compileContractHandler = async (): Promise<void> => {
     if (!opts) return;
@@ -226,12 +240,7 @@
       contractArtifacts = artifacts;
       compiling = false;
       compiled = artifacts !== undefined;
-      toast.push(`Compiled ${opts.name} contract successfully!`, {
-        theme: {
-          "--toastBackground": "#4caf50",
-          "--toastColor": "#fff",
-        },
-      });
+      successToast(`Compiled <em>${opts.name}</em> successfully!`);
 
       setTimeout(() => {
         compiled = false;
@@ -242,12 +251,9 @@
       compiling = false;
       compiled = false;
       contractError = error;
-      toast.push(`Error compiling ${opts.name} contract!`, {
-        theme: {
-          "--toastBackground": "var(--color-red-500)",
-          "--toastColor": "var(--color-white)",
-        },
-      });
+      failureToast(
+        `<strong>Error compiling ${opts.name}!</strong> <br> Check console for details.`
+      );
       setTimeout(() => {
         erroring = false;
         contractError = undefined;
@@ -274,14 +280,8 @@
           success,
           error,
         });
-        toast.push(
-          `Deployed contract successfully! ${deployedContractAddress} <br /> ${txHash}`,
-          {
-            theme: {
-              "--toastBackground": "#4caf50",
-              "--toastColor": "#fff",
-            },
-          }
+        successToast(
+          `<strong>Deployed contract successfully!</strong> <br> ${deployedContractAddress} <br> ${txHash}`
         );
       } else {
         throw new Error("Error deploying contract");
@@ -292,14 +292,8 @@
     } catch (error: any) {
       console.log("deployContractHandler error", { error });
       contractError = error.message;
-      toast.push(
-        `Error deploying contract! check the console.log for more info.`,
-        {
-          theme: {
-            "--toastBackground": "var(--color-red-500)",
-            "--toastColor": "var(--color-white)",
-          },
-        }
+      failureToast(
+        `<strong>Error deploying contract!</strong> <br>Check the console.log for more info.`
       );
       deploying = false;
       return;
@@ -312,11 +306,15 @@
       initializing = true;
       const initialized = await initializeContract(opts);
       initializing = false;
+      successToast(`Initialized contract successfully!`);
       return initialized;
     } catch (error: any) {
       console.log("initContractHandler error", { error });
       contractError = error.message;
       initializing = false;
+      failureToast(
+        `<strong>Error initializing contract!</strong> <br> Check the console.log for more info.`
+      );
       return;
     }
   };
@@ -339,7 +337,11 @@
     {#if $chainId}
       <div>
         <p class="font-bold">Current chain</p>
-        <p><span class="capitalize text-green-500">{$chainName}</span></p>
+        <p class="inline-flex items-center">
+            <span class="capitalize text-green-500"
+              >{NETWORK_CONTRACTS_MAP[$chainId ?? NETWORK_MAP[1]].name}</span
+            >
+        </p>
       </div>
     {:else}
       <div>
@@ -351,12 +353,12 @@
       <div>
         <p class="font-bold">Current signer address</p>
         <p>
-          {$signerAddress}
+          {shortenAddress($signerAddress, 6)}
           <button
             class="copy-button"
             use:copy={$signerAddress}
             on:svelte-copy={(event) =>
-              alert(`Copied ${$signerAddress} to clipboard`)}
+              infoToast(`Copied ${$signerAddress} to clipboard`)}
             ><CopyIcon /></button
           >
         </p>
@@ -414,31 +416,31 @@
           {/if}
         </button>
         <div slot="content">Copy the contract code.</div>
-        </Tooltip>
-        <Tooltip let:trigger theme="border" hideOnClick={false} interactive>
-          <button
-            use:trigger
-            class={clsx(
-              "action-button min-w-[165px] transition-colors",
-              contractError && "text-red-500",
-              compiled && "text-green-500"
-            )}
-            on:click={compileContractHandler}
-          >
-            {#if compiling}
-              <ProcessingIcon />
-              Compiling contract
-            {:else}
-              <CompileIcon />
-              Compile contract
-            {/if}
-          </button>
-          <div slot="content">Compile this contract.</div>
-        </Tooltip>
+      </Tooltip>
       <Tooltip let:trigger theme="border" hideOnClick={false} interactive>
         <button
           use:trigger
-          class="action-button"
+          class={clsx(
+            "action-button min-w-[165px] transition-colors",
+            contractError && "text-red-500",
+            compiled && "text-green-500"
+          )}
+          on:click={compileContractHandler}
+        >
+          {#if compiling}
+            <ProcessingIcon />
+            Compiling contract
+          {:else}
+            <CompileIcon />
+            Compile contract
+          {/if}
+        </button>
+        <div slot="content">Compile this contract.</div>
+      </Tooltip>
+      <Tooltip let:trigger theme="border" hideOnClick={false} interactive>
+        <button
+          use:trigger
+          class="action-button min-w-[165px]"
           on:click={() => contractArtifacts && handleCopy(contractArtifacts)}
           disabled={contractArtifacts === undefined}
         >
@@ -468,23 +470,30 @@
         <div slot="content">
           {#if contractArtifacts}
             Deploy this contract on <i class="text-green-400 capitalize"
-              >{$chainName}</i
-            > network.
+              >{NETWORK_CONTRACTS_MAP[$chainId ?? NETWORK_MAP[1]].name}</i
+            >.
           {:else}
+            {#if deploying}
+            Deploying this contract on <i class="text-green-400 capitalize"
+            >{NETWORK_CONTRACTS_MAP[$chainId ?? NETWORK_MAP[1]].name}</i
+            >.
+            {:else}
+
             Please compile your contract before you deploy it.
+            {/if}
           {/if}
         </div>
       </Tooltip>
       <Tooltip let:trigger theme="border" hideOnClick={false} interactive>
         <button
           use:trigger
-          class="action-button"
+          class="action-button min-w-[165px]"
           on:click={initContractHandler}
           disabled={deployedContractAddress === undefined}
         >
           {#if initializing}
             <ProcessingIcon />
-            Initializing
+            Initializing Contract
           {:else}
             <DeployIcon />
             Initialize Contract
@@ -492,9 +501,9 @@
         </button>
         <div slot="content">
           {#if deployedContractAddress}
-            initialize this contract on <i class="text-green-400 capitalize"
-              >{$chainName}</i
-            > network.
+            Initialize this contract on <i class="text-green-400 capitalize"
+              >{NETWORK_CONTRACTS_MAP[$chainId ?? NETWORK_MAP[1]].name}</i
+            >.
           {:else}
             Please compile and deploy your contract before you deploy it.
           {/if}
@@ -503,36 +512,38 @@
       <Tooltip let:trigger theme="border" hideOnClick={false} interactive>
         <button
           use:trigger
-          class="action-button"
+          class="action-button min-w-[165px]"
           class:disabled={opts?.upgradeable === "transparent"}
           on:click={remixHandler}
         >
           <RemixIcon />
           Open in Remix
         </button>
-        {#if opts?.upgradeable === "transparent"}
-          <div slot="content">
-            Transparent upgradeable contracts are not supported on Remix. Try
-            using Remix with UUPS upgradability or use Hardhat or Truffle with
-            <a
-              href="https://docs.openzeppelin.com/upgrades-plugins/"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-white">OpenZeppelin Upgrades <ExternalIcon /></a
-            >.
-            <br />
-            <!-- svelte-ignore a11y-invalid-attribute -->
-            <a href="#" on:click={remixHandler} class="text-white"
-              >Open in Remix anyway <ExternalIcon /></a
-            >.
-          </div>
-        {:else}
-          <div slot="content">Open this contract in Remix</div>
-        {/if}
+        <div slot="content">
+          {#if opts?.upgradeable === "transparent"}
+            <div>
+              Transparent upgradeable contracts are not supported on Remix. Try
+              using Remix with UUPS upgradability or use Hardhat or Truffle with
+              <a
+                href="https://docs.openzeppelin.com/upgrades-plugins/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-white">OpenZeppelin Upgrades <ExternalIcon /></a
+              >.
+              <br />
+              <!-- svelte-ignore a11y-invalid-attribute -->
+              <a href="#" on:click={remixHandler} class="text-white"
+                >Open in Remix anyway <ExternalIcon /></a
+              >.
+            </div>
+          {:else}
+            Open this contract in Remix
+          {/if}
+        </div>
       </Tooltip>
 
       <Dropdown let:active>
-        <button class="action-button" class:active slot="button">
+        <button class="action-button min-w-[165px]" class:active slot="button">
           <DownloadIcon />
           Download
         </button>
@@ -565,7 +576,7 @@
         {/if}
 
         <button
-          class="download-option"
+          class="download-option min-w-[165px]"
           on:click={downloadVendoredHandler}
           disabled
         >
@@ -580,21 +591,7 @@
       </Dropdown>
     </div>
   </div>
-  {#if erroring}
-    <p class="text-red-500 text-sm text-center">
-      Error. Please check the console for details.
-    </p>
-  {/if}
-  {#if compiled}
-    <p class="text-green-500 text-sm text-center">
-      {`${opts?.name} successfully compiled.`}
-    </p>
-  {/if}
-  {#if deployedContractAddress !== undefined}
-    <p class="text-green-500 text-sm text-center">
-      {`${opts?.name} successfully deployed at ${deployedContractAddress}.`}
-    </p>
-  {/if}
+
   <div class="flex flex-row gap-4 grow">
     <div class="controls w-64 flex flex-col shrink-0 justify-between">
       <div class:hidden={tab !== "PURE"}>
@@ -616,7 +613,9 @@
   </div>
 </div>
 
-<SvelteToast options={toastOptions} />
+<div class="text-sm">
+  <SvelteToast options={toastOptions} />
+</div>
 
 <style lang="postcss">
   .container {

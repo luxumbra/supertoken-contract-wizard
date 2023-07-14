@@ -1,6 +1,6 @@
 import type { Contract } from '@superfluid-wizard/core';
 import { ethers } from 'ethers';
-import { BACKEND_URL } from './constants';
+import { BACKEND_URL, NETWORK_CONTRACTS_MAP, NetworkId } from './constants';
 
 export const initializeData = {
   contractAddress: '',
@@ -171,15 +171,22 @@ export const compileContract = async (compileData: CompileContractProps): Promis
   }
 }
 
+
 export const initializeContract = async (opts: any) => {
   if (!initializeData.contractAddress || !initializeData.initializeABI) return;
+  try {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
+  console.log({provider});
+
+  const currentChainId = provider.network.chainId as NetworkId ?? 1 as NetworkId;
+  const factoryAddress = NETWORK_CONTRACTS_MAP[currentChainId].contract;
   const signer = provider.getSigner();
   const supertoken = new ethers.Contract(initializeData.contractAddress, initializeData.initializeABI, signer);
   console.log(supertoken, 'supertoken')
-  try {
+  console.log(factoryAddress, 'factoryAddress');
+
     //TO DO: DYNAMICALLY FETCH THE supertokenfactory ADDRESS FOR CHAIN WHICH YOU ARE DEPLOYING ON AND PASS IT IN THE FIRST PARAMETER
-    const tx = await supertoken.initialize('0x2C90719f25B10Fc5646c82DA3240C76Fa5BcCF34', opts.name, opts.symbol);
+    const tx = await supertoken.initialize(factoryAddress, opts.name, opts.symbol);
     return tx;
   } catch (error: any) {
     console.log('initializeContract', error.message);

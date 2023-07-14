@@ -210,10 +210,12 @@ body .leadinModal.leadinModal-theme-top {
     }
   }
 
+  ._toastContainer {
+    font-family: 'silka', Arial, Helvetica, sans-serif;
+    font-size: 0.8rem;
+    backdrop-filter: blur(10px);
+    }
 
-  ._toastItem {
-   drop-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.);
-  }
-  ._toastBar {
-    background-color: #4e5de4;
-  }
+    ._toastItem {
+    backdrop-filter: blur(10px);
+    }
