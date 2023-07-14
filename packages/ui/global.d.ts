@@ -12,6 +12,7 @@ declare global {
     [key in NetworkId]: {
       name: NetworkMap[key];
       contract: FactoryContractMap[key];
+      blockExplorer: string;
     };
   };
 }

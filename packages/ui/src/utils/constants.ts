@@ -22,14 +22,17 @@ const NETWORK_CONTRACTS_MAP: NetworkContractsMap = {
   [NetworkId.Mainnet]: {
     name: NETWORK_MAP[NetworkId.Mainnet]!,
     contract: FACTORY_CONTRACT_MAP[NetworkId.Mainnet]!,
+    blockExplorer: 'https://etherscan.io',
   },
   [NetworkId.GnosisChain]: {
     name: NETWORK_MAP[NetworkId.GnosisChain]!,
     contract: FACTORY_CONTRACT_MAP[NetworkId.GnosisChain]!,
+    blockExplorer: 'https://gnosisscan.io',
   },
   [NetworkId.Polygon]: {
     name: NETWORK_MAP[NetworkId.Polygon]!,
     contract: FACTORY_CONTRACT_MAP[NetworkId.Polygon]!,
+    blockExplorer: 'https://polygonscan.com',
   },
 };
 

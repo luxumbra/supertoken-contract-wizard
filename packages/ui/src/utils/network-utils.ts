@@ -5,8 +5,12 @@ import { switchNetwork } from "@wagmi/core";
  * @param chainId
  * @returns network data
  */
-const getNetworkData = (chainId: NetworkId) => {
-  return NETWORK_CONTRACTS_MAP[chainId] || { name: 'Unknown Network', contract: 'No Contract Found for Network' };
+const getNetworkData = (chainId: NetworkId | number) => {
+  return NETWORK_CONTRACTS_MAP[chainId] || {
+    name: 'Unknown Network',
+    contract: 'No Contract Found for Network',
+    blockExplorer: 'https://etherscan.io'
+  };
 };
 
 const changeNetwork = async (chainId: number) => {
@@ -14,7 +18,8 @@ const changeNetwork = async (chainId: number) => {
   return network;
 };
 
-const shortenAddress = (address: string, gap: number) => {
+const shortenAddress = (address: string | undefined, gap = 6) => {
+  if (!address) return '';
   return `${address.slice(0, 6)}...${address.slice(-gap)}`;
 };
 

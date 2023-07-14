@@ -92,3 +92,8 @@
   top: 1px;
   border-right-color: var(--tippy-border);
 }
+
+.tippy-box a {
+  color: white;
+  text-decoration: underline;
+}

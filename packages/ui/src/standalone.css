@@ -219,3 +219,8 @@ body .leadinModal.leadinModal-theme-top {
     ._toastItem {
     backdrop-filter: blur(10px);
     }
+
+    ._toastItem a {
+    color: white;
+    text-decoration: underline;
+    }

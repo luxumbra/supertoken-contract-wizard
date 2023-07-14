@@ -1,6 +1,7 @@
 import type { Contract } from '@superfluid-wizard/core';
 import { ethers } from 'ethers';
 import { BACKEND_URL, NETWORK_CONTRACTS_MAP, NetworkId } from './constants';
+import {chainId} from "svelte-wagmi";
 
 export const initializeData = {
   contractAddress: '',
@@ -172,14 +173,13 @@ export const compileContract = async (compileData: CompileContractProps): Promis
 }
 
 
-export const initializeContract = async (opts: any) => {
+export const initializeContract = async (opts: any, chainId: number) => {
   if (!initializeData.contractAddress || !initializeData.initializeABI) return;
   try {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   console.log({provider});
 
-  const currentChainId = provider.network.chainId as NetworkId ?? 1 as NetworkId;
-  const factoryAddress = NETWORK_CONTRACTS_MAP[currentChainId].contract;
+  const factoryAddress = NETWORK_CONTRACTS_MAP[chainId ?? 1]?.contract;
   const signer = provider.getSigner();
   const supertoken = new ethers.Contract(initializeData.contractAddress, initializeData.initializeABI, signer);
   console.log(supertoken, 'supertoken')
