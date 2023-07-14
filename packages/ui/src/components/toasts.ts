@@ -11,7 +11,7 @@ export const toastOptions = {
     "--toastColor": "#fff",
     "--toastBorderRadius": "0.5rem",
     "--toastBoxShadow": "0 0 0.5rem rgba(0, 0, 0, 0.5)",
-    "--toastWidth": "20rem",
+    "--toastWidth": "auto",
   },
 }
 

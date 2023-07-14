@@ -293,7 +293,7 @@
       const initialized = await initializeContract(opts, $chainId as number);
 
       if (initialized) {
-        successToast(`<strong>Initialized successfully!</strong> <br> <a href="${NETWORK_CONTRACTS_MAP[$chainId ?? 1]?.blockExplorer}/address/${initialized.address}" target="_blank" ref="noreferrer">${initialized.address}</a>`);
+        successToast(`<strong>Initialized contract successfully!</strong> <br> <a href="${NETWORK_CONTRACTS_MAP[$chainId ?? 1]?.blockExplorer}/address/${initialized.address}" target="_blank" ref="noreferrer">${initialized.address}</a>`);
         console.log("initContractHandler initialized...", { initialized });
         initializing = false;
         return initialized;
