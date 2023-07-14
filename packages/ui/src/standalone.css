@@ -209,3 +209,18 @@ body .leadinModal.leadinModal-theme-top {
       opacity: 1;
     }
   }
+
+  ._toastContainer {
+    font-family: 'silka', Arial, Helvetica, sans-serif;
+    font-size: 0.8rem;
+    backdrop-filter: blur(10px);
+    }
+
+    ._toastItem {
+    backdrop-filter: blur(10px);
+    }
+
+    ._toastItem a {
+    color: white;
+    text-decoration: underline;
+    }

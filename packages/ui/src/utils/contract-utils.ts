@@ -1,6 +1,7 @@
 import type { Contract } from '@superfluid-wizard/core';
 import { ethers } from 'ethers';
-import { BACKEND_URL } from './constants';
+import { BACKEND_URL, NETWORK_CONTRACTS_MAP, NetworkId } from './constants';
+import {chainId} from "svelte-wagmi";
 
 export const initializeData = {
   contractAddress: '',
@@ -27,7 +28,9 @@ export interface DeployContractProps {
 
 export interface DeployContractResponse {
   contractAddress: string;
+  txHash?: string;
   success: boolean;
+  error?: string;
 }
 
 /**
@@ -69,14 +72,15 @@ export const deployContract = async (deployData: DeployContractProps) => {
     //   throw new Error('Transaction failed');
     // }
     console.log(initializeData, 'test 1')
-    if (tx.transactionHash !== null) {
+    if (tx.transactionHash !== undefined) {
       const receipt = await provider.getTransactionReceipt(tx.transactionHash);
-      const contractAddress = receipt.contractAddress;
+      const contractAddress = receipt.contractAddress as string;
       // console.log('contract deployed to', contractAddress);
       initializeData.contractAddress = contractAddress;
 
       return {
         contractAddress,
+        txHash: tx.transactionHash,
         success: true
       };
     } else {
@@ -168,15 +172,21 @@ export const compileContract = async (compileData: CompileContractProps): Promis
   }
 }
 
-export const initializeContract = async (opts: any) => {
+
+export const initializeContract = async (opts: any, chainId: number) => {
   if (!initializeData.contractAddress || !initializeData.initializeABI) return;
+  try {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
+  console.log({provider});
+
+  const factoryAddress = NETWORK_CONTRACTS_MAP[chainId ?? 1]?.contract;
   const signer = provider.getSigner();
   const supertoken = new ethers.Contract(initializeData.contractAddress, initializeData.initializeABI, signer);
   console.log(supertoken, 'supertoken')
-  try {
+  console.log(factoryAddress, 'factoryAddress');
+
     //TO DO: DYNAMICALLY FETCH THE supertokenfactory ADDRESS FOR CHAIN WHICH YOU ARE DEPLOYING ON AND PASS IT IN THE FIRST PARAMETER
-    const tx = await supertoken.initialize('0x2C90719f25B10Fc5646c82DA3240C76Fa5BcCF34', opts.name, opts.symbol);
+    const tx = await supertoken.initialize(factoryAddress, opts.name, opts.symbol);
     return tx;
   } catch (error: any) {
     console.log('initializeContract', error.message);
