@@ -69,6 +69,14 @@
         Privileged accounts will be able to create more supply.
       </HelpTooltip>
     </label>
+
+    <label class:checked={opts.burnable}>
+      <input type="checkbox" bind:checked={opts.burnable}>
+      Burnable
+      <HelpTooltip>
+        Token holders will be able to destroy their tokens.
+      </HelpTooltip>
+    </label>
   </div>
 </section>
 
