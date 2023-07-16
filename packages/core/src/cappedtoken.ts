@@ -64,7 +64,11 @@ export function buildCappedSuperToken(opts: CappedSuperTokenOptions): Contract {
   setInfo(c, info);
 
   if (allOpts.mintable) {
-    addMintable(c, allOpts.receiver, allOpts.initialSupply, allOpts.maxSupply);
+    addMintable(c, allOpts.receiver, allOpts.initialSupply);
+  }
+
+  if (allOpts.burnable) {
+    addBurnable(c, allOpts.initialSupply, allOpts.userData);
   }
 
   if (access === 'ownable') {
@@ -72,7 +76,7 @@ export function buildCappedSuperToken(opts: CappedSuperTokenOptions): Contract {
   }
 
   if (access === 'roles') {
-    addRoles(c);
+    addRoles(c, allOpts);
   }
 
 
@@ -85,8 +89,10 @@ function addBase(c: ContractBuilder, name: string, symbol: string, maxSupply: nu
     path: 'github.com/superfluid-finance/custom-supertokens/contracts/base/SuperTokenBase.sol',
   });
 
+  c.addVariable(`error SupplyCapped();\n`);
+  c.addVariable(`uint256 public maxSupply;`);
   c.addFunctionCode(`_initialize(factory, name, symbol);`, functions.initialize);
-  c.addFunctionCode(`_maxSupply = ${maxSupply};`, functions.initialize);
+  c.addFunctionCode(`maxSupply = ${maxSupply};`, functions.initialize);
 }
 
 export const premintPattern = /^(\d*)(?:\.(\d+))?(?:e(\d+))?$/;
@@ -111,27 +117,46 @@ function addPremint(c: ContractBuilder, receiver: string, initialSupply: number,
 }
 
 function addOwnable(c: ContractBuilder) {
+  c.addParent({
+    name: 'Ownable',
+    path: '@openzeppelin/contracts/access/Ownable.sol',
+  });
   c.addModifier(`onlyOwner`, functions.mint);
 }
 
-function addRoles(c: ContractBuilder) {
-  c.addVariable(`bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");`)
+function addRoles(c: ContractBuilder, opts: CappedSuperTokenOptions) {
+  c.addVariable(`bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");`);
+
+  if (opts.burnable) {
+    c.addVariable(`bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");`);
+  }
+
   c.addParent({
     name: 'AccessControl',
     path: '@openzeppelin/contracts/access/AccessControl.sol',
   });
-  c.addModifier(`onlyRole(MINTER_ROLE)`, functions.mint);
+
+  c.addFunctionCode(`require(hasRole(MINTER_ROLE, msg.sender), "Caller is not a minter");`, functions.mint);
+  // c.addModifier(`onlyMinter`, functions.mint);
 
   c.addConstructorCode(`_setupRole(DEFAULT_ADMIN_ROLE, msg.sender);`);
   c.addConstructorCode(`_setupRole(MINTER_ROLE, msg.sender);`);
+
+  if (opts.burnable) {
+    c.addFunctionCode(`require(hasRole(BURNER_ROLE, msg.sender), "Caller is not a burner");`, functions.burn);
+    c.addConstructorCode(`_setupRole(BURNER_ROLE, msg.sender);`);
+  }
 }
 
-function addMintable(c: ContractBuilder, receiver: string, amount: number, maxSupply: number) {
+function addMintable(c: ContractBuilder, recipient: string, amount: number) {
   // const preminted = formatAmount(amount);
-  c.addFunctionCode(`if (_totalSupply() + ${amount} > ${maxSupply}) revert SupplyCapped();\n`, functions.mint);
-  c.addFunctionCode(`_mint(receiver, amount, userData);`, functions.mint);
+  c.addFunctionCode(`if (_totalSupply() + amount > maxSupply) revert SupplyCapped();\n`, functions.mint);
+  c.addFunctionCode(`_mint(recipient, amount, userData);`, functions.mint);
 }
 
+function addBurnable(c: ContractBuilder, amount?: number, userData?: string) {
+  c.addFunctionCode(`_burn(msg.sender, amount, userData);`, functions.burn);
+}
 
 //wtf
 export const functions = {
@@ -142,14 +167,14 @@ export const functions = {
       { name: 'factory', type: 'address' },
       { name: 'name', type: 'string memory' },
       { name: 'symbol', type: 'string memory' },
-      { name: '_maxSupply', type: 'uint256' },
+      // { name: '_maxSupply', type: 'uint256' },
     ],
   },
   _mint: {
     kind: 'internal' as const,
     name: '_mint',
     args: [
-      { name: 'receiver', type: 'address' },
+      { name: 'recipient', type: 'address' },
       { name: 'amount', type: 'uint256' },
       { name: 'data', type: 'bytes' },
     ],
@@ -158,7 +183,7 @@ export const functions = {
     kind: 'external' as const,
     name: 'mint',
     args: [
-      { name: 'receiver', type: 'address' },
+      { name: 'recipient', type: 'address' },
       { name: 'amount', type: 'uint256' },
       { name: 'userData', type: 'bytes memory' },
     ]
